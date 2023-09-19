@@ -1,0 +1,10 @@
+version: '3.8'
+
+services:
+  app:
+    container_name: Admin2-Frontend
+    image: admin2-frontend-image
+    build:
+      context: .
+    ports:
+      - 80:80
