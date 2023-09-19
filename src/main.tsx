@@ -5,7 +5,7 @@ import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
 
 import "./index.css";
 import { Layout } from "./Layout.tsx";
-import { ControlledUsers } from "./pages";
+import { Login } from "./pages";
 
 
 const router = createBrowserRouter([
@@ -15,7 +15,7 @@ const router = createBrowserRouter([
 		children: [
 			{
 				path: "",
-				element: <ControlledUsers />,
+				element: <Login />,
 			}
 		],
 	},
