@@ -1,0 +1,27 @@
+h2 {
+    text-align: center;
+}
+
+.content-box{
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+    align-items: center;
+}
+
+.div-input-form{
+    display: flex;
+    justify-content: center;
+}
+
+.div-button{
+    display: flex;
+    justify-content: center;
+}
+
+.appbar{
+    background-color: '#DC7A20';
+    height: '6.5vh';
+    font-display:initial;
+    justify-content: center;
+}
