@@ -1,4 +1,4 @@
-import * as React from 'react';
+import { useState } from 'react';
 import Box from '@mui/material/Box';
 import Container  from '@mui/material/Container';
 import CssBaseline from '@mui/material/CssBaseline';
@@ -11,58 +11,8 @@ import Visibility from '@mui/icons-material/Visibility';
 import VisibilityOff from '@mui/icons-material/VisibilityOff';
 import Button, { ButtonProps } from '@mui/material/Button';
 import { styled } from '@mui/material/styles';
-import  Navbar from '../components/Navbar';
-
-export default function LoginTextFields() {
-    const [showPassword, setShowPassword] = React.useState(false);
-
-    const handleClickShowPassword = () => setShowPassword((show) => !show);
-  
-    const handleMouseDownPassword = (event: React.MouseEvent<HTMLButtonElement>) => {
-      event.preventDefault();
-    };
-
-    return (
-        <Box
-            component="form"
-            sx={{
-                '& .MuiTextField-root': {m: 3, width: '25ch'},
-            }}
-            noValidate
-            autoComplete='off'
-            >
-                <div className="div-input-form">
-                    <FormControl sx={{ m:4, width: '65vh'}} variant="standard">
-                        <InputLabel htmlFor="standard-adornment-correo">Correo</InputLabel>
-                        <Input
-                            id="standard-adornment-amount"
-                        />
-                    </FormControl>
-                </div>
-                <div className="div-input-form">
-                    <FormControl sx={{ m:4, width: '65vh'}} variant="standard">
-                        <InputLabel htmlFor="standard-adornment-password">Contraseña</InputLabel>
-                        <Input
-                            id="filled-adornment-password"
-                            type={showPassword ? 'text' : 'password'}
-                            endAdornment={
-                                <InputAdornment position="end">
-                                    <IconButton
-                                    aria-label="toggle password visibility"
-                                    onClick={handleClickShowPassword}
-                                    onMouseDown={handleMouseDownPassword}
-                                    edge="end"
-                                    >
-                                    {showPassword ? <VisibilityOff /> : <Visibility />}
-                                    </IconButton>
-                                </InputAdornment>
-                            }
-                        />
-                    </FormControl>
-                </div>
-            </Box>
-    );
-}
+import { useInitSession } from '../api';
+import { User } from '../interfaces';
 
 const ColorButton = styled(Button)<ButtonProps>(({theme}) => ({
     color: theme.palette.getContrastText('#CB8B2A'),
@@ -73,28 +23,84 @@ const ColorButton = styled(Button)<ButtonProps>(({theme}) => ({
 }));
 
 export const Login = () => {
-    const options: {label: string; link: string} [] = [
-        // { label: 'Inicio', link: '/' },
-        // { label: 'Servicios', link: '/servicios' },
-        // { label: 'Acerca de', link: '/acerca-de' },
-    ];
+    const initSession = useInitSession();
+    const [showPassword, setShowPassword] = useState(false);
+    const [user, setUser] = useState<User>({
+        email: '',
+        password: ''
+    });
+    
+    const handleClickShowPassword = () => setShowPassword((show) => !show);
+  
+    const handleMouseDownPassword = (event: React.MouseEvent<HTMLButtonElement>) => {
+      event.preventDefault();
+    };
+
+    const requestInitSession = () => {
+        console.log(user);
+
+        initSession.mutate(user, {
+            onSuccess: (received) => {
+                console.log(received);
+            }
+        });
+    };
+
     return (
-		<>  
-            <Navbar options={options} />
-            <React.Fragment>
-                <CssBaseline />
-                <Container maxWidth="md" style={{height: '100vh', display: 'flex', alignItems: 'center'}}>
-                    <Box sx={{bgcolor: '#F0EFEF', width: '100%', height:'60vh'}} className="content-box">
-                        <div>
-                            <h2>Bienvenido al sistema AMS</h2>
-                        </div> 
-                        <LoginTextFields/>
-                        <div className='div-button'>
-                            <ColorButton variant="contained">Iniciar Sesión</ColorButton>
-                        </div>    
+		<>
+            <CssBaseline />
+            <Container maxWidth="md" style={{height: '100vh', display: 'flex', alignItems: 'center'}}>
+                <Box sx={{bgcolor: '#F0EFEF', width: '100%', height:'60vh'}} className="content-box">
+                    <div>
+                        <h2>Bienvenido al sistema AMS</h2>
+                    </div> 
+                    
+                    <Box
+                        component="form"
+                        sx={{
+                            '& .MuiTextField-root': {m: 3, width: '25ch'},
+                        }}
+                        noValidate
+                        autoComplete='off'
+                    >
+                        <div className="div-input-form">
+                            <FormControl sx={{ m:4, width: '65vh'}} variant="standard">
+                                <InputLabel htmlFor="standard-adornment-correo">Correo</InputLabel>
+                                <Input
+                                    id="standard-adornment-amount"
+                                    onChange={(e) => setUser({...user, email: e.target.value})}
+                                />
+                            </FormControl>
+                        </div>
+                        <div className="div-input-form">
+                            <FormControl sx={{ m:4, width: '65vh'}} variant="standard">
+                                <InputLabel htmlFor="standard-adornment-password">Contraseña</InputLabel>
+                                <Input
+                                    id="filled-adornment-password"
+                                    type={showPassword ? 'text' : 'password'}
+                                    onChange={(e) => setUser({...user, password: e.target.value})}
+                                    endAdornment={
+                                        <InputAdornment position="end">
+                                            <IconButton
+                                            aria-label="toggle password visibility"
+                                            onClick={handleClickShowPassword}
+                                            onMouseDown={handleMouseDownPassword}
+                                            edge="end"
+                                            >
+                                            {showPassword ? <Visibility /> : <VisibilityOff />}
+                                            </IconButton>
+                                        </InputAdornment>
+                                    }
+                                />
+                            </FormControl>
+                        </div>
                     </Box>
-                </Container>
-            </React.Fragment>
+
+                    <div className='div-button'>
+                        <ColorButton variant="contained" onClick={requestInitSession}>Iniciar Sesión</ColorButton>
+                    </div>    
+                </Box>
+            </Container>
         </>
     )
 }

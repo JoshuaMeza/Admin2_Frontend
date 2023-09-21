@@ -7,7 +7,7 @@ interface NavbarProps {
     options: {label:string, link: string}[];
 }
 
-const Navbar: React.FC<NavbarProps> = ({options}) => {
+export const Navbar: React.FC<NavbarProps> = ({options}) => {
 
     return (
     <Box sx={{ flexGrow: 1 }}>
@@ -26,5 +26,3 @@ const Navbar: React.FC<NavbarProps> = ({options}) => {
     </Box>
     );
 }
-
-export default Navbar;
