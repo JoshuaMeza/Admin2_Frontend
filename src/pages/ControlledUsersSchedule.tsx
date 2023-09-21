@@ -5,11 +5,33 @@ import CssBaseline from '@mui/material/CssBaseline';
 import Paper from '@mui/material/Paper';
 import Table from '@mui/material/Table';
 import TableBody from '@mui/material/TableBody';
-import TableCell from '@mui/material/TableCell';
+import TableCell, { tableCellClasses } from '@mui/material/TableCell';
 import TableContainer from '@mui/material/TableContainer';
 import TableHead from '@mui/material/TableHead';
-import TablePagination from '@mui/material/TablePagination';
+import { styled } from '@mui/material/styles';
 import TableRow from '@mui/material/TableRow';
+
+const StyledTableCell = styled(TableCell)(({ theme }) => ({
+    [`&.${tableCellClasses.head}`]: {
+      backgroundColor: '#CB8B2A',
+      color: theme.palette.common.black,
+      fontSize: 16
+    },
+    [`&.${tableCellClasses.body}`]: {
+      fontSize: 12,
+      fontweigth: 'bold'
+    },
+  }));
+  
+  const StyledTableRow = styled(TableRow)(({ theme }) => ({
+    '&:nth-of-type(odd)': {
+      backgroundColor: theme.palette.action.hover,
+    },
+    // hide last border
+    '&:last-child td, &:last-child th': {
+      border: 0,
+    },
+  }));
 
 function createData(
     entryD: string,
@@ -43,11 +65,6 @@ const columns: readonly Column[] = [
 ];
 
 export const ControlledUsersSchedule = () => {
-    const[page, setPage] = React.useState(0);
-    const handleChangePage = (event: unknown, newPage: number) => {
-        setPage(newPage);
-    };
-
     return (
 		<>  
             <CssBaseline/>
@@ -66,28 +83,31 @@ export const ControlledUsersSchedule = () => {
                             <TableHead>
                                 <TableRow>
                                     {columns.map((column) => (
-                                    <TableCell
+                                    <StyledTableCell
                                         key={column.id}
                                         align='center'
                                         style={{ minWidth: column.minWidth }}
                                     >
                                         {column.label}
-                                    </TableCell>
+                                    </StyledTableCell>
                                     ))}
                                 </TableRow>
                             </TableHead>
                             <TableBody>
                                 {rows.map((row) => (
-                                    <TableRow
+                                    <StyledTableRow
                                     key={row.entryD}
-                                    sx={{ '&:last-child td, &:last-child th': { border: 0 } }}
+                                    sx={{ 
+                                        '&:last-child td, &:last-child th': { border: 0 },
+                                        '&:nth-of-type(odd) .MuiTableCell-body': { color: '#CB8B2A' },
+                                    }}
                                     >
-                                    <TableCell component="th" scope="row" align='center'>
+                                    <StyledTableCell component="th" scope="row" align='center'>
                                         {row.entryD} {row.entryH}
-                                    </TableCell>
-                                    <TableCell align="center">{row.departureD} {row.departureH}</TableCell>
+                                    </StyledTableCell>
+                                    <StyledTableCell align="center">{row.departureD} {row.departureH}</StyledTableCell>
                                     
-                                    </TableRow>
+                                    </StyledTableRow>
                                 ))}
                             </TableBody>
                         </Table>
