@@ -1,13 +1,16 @@
-import Box from "@mui/material/Box";
-import Paper from "@mui/material/Paper";
-import Table from "@mui/material/Table";
-import TableBody from "@mui/material/TableBody";
-import TableCell, { tableCellClasses } from "@mui/material/TableCell";
-import TableContainer from "@mui/material/TableContainer";
-import TableHead from "@mui/material/TableHead";
-import { styled } from "@mui/material/styles";
-import TableRow from "@mui/material/TableRow";
-import { Container } from "@mui/material";
+import {
+	Box,
+	Container,
+	Paper,
+	Table,
+	TableBody,
+	TableCell,
+	TableContainer,
+	TableHead,
+	TableRow,
+	styled,
+	tableCellClasses,
+} from "@mui/material";
 
 const StyledTableCell = styled(TableCell)(({ theme }) => ({
 	[`&.${tableCellClasses.head}`]: {
@@ -25,43 +28,30 @@ const StyledTableRow = styled(TableRow)(({ theme }) => ({
 	"&:nth-of-type(odd)": {
 		backgroundColor: theme.palette.action.hover,
 	},
-	// hide last border
 	"&:last-child td, &:last-child th": {
 		border: 0,
 	},
 }));
 
-function createData(
-	entryD: string,
-	entryH: string,
-	departureD: string,
-	departureH: string
-) {
-	return { entryD, entryH, departureD, departureH };
-}
-
-const rows = [
-	createData("Lunes", "9:00", "Lunes", "17:00"),
-	createData("Martes", "9:00", "Martes", "17:00"),
-	createData("Miercoles", "9:00", "Miercoles", "17:00"),
-	createData("Jueves", "9:00", "Jueves", "17:00"),
-	createData("Viernes", "9:00", "Viernes", "17:00"),
-];
-
 interface Column {
-	id: "entry" | "departure";
+	id: string;
 	label: string;
-	minWidth?: number;
-	align?: "center";
-	format?: (value: number) => string;
+	minWidth: number;
 }
 
-const columns: readonly Column[] = [
-	{ id: "entry", label: "Entrada", minWidth: 300 },
-	{ id: "departure", label: "Salida", minWidth: 300 },
-];
+export const ControlledUsersHistory = () => {
+	const columns: Column[] = [
+		{ id: "day", label: "Día", minWidth: 200 },
+		{ id: "entry", label: "Entrada", minWidth: 200 },
+		{ id: "departure", label: "Salida", minWidth: 200 },
+	];
 
-export const ControlledUsersSchedule = () => {
+	const rows = [
+		{ day: "Miercoles", entry: "9:00 - 07/Sep/2023", exit: "No registrado" },
+		{ day: "Martes", entry: "9:01 - 06/Sep/2023", exit: "17:00 - 06/Sep/2023" },
+		{ day: "Lunes", entry: "9:02 - 05/Sep/2023", exit: "17:01 - 05/Sep/2023" },
+	];
+
 	return (
 		<>
 			<Container
@@ -76,8 +66,7 @@ export const ControlledUsersSchedule = () => {
 				<Box
 					sx={{ minWidth: "70%", bgcolor: "#F0EFEF", padding: "2.5rem 1.5rem" }}
 				>
-					<h2 style={{ marginTop: '0' }}>¡Hola de nuevo Nombre de Usuario!</h2>
-					<p>Tu horario es:</p>
+					<h2 style={{ marginTop: '0' }}>Historial de asistencia</h2>
 					<Paper sx={{ width: "100%", overflow: "hidden" }}>
 						<TableContainer sx={{ maxHeight: 440 }}>
 							<Table stickyHeader aria-label="sticky table">
@@ -95,9 +84,9 @@ export const ControlledUsersSchedule = () => {
 									</TableRow>
 								</TableHead>
 								<TableBody>
-									{rows.map((row) => (
+									{rows.map((row, index) => (
 										<StyledTableRow
-											key={row.entryD}
+											key={index}
 											sx={{
 												"&:last-child td, &:last-child th": { border: 0 },
 												"&:nth-of-type(odd) .MuiTableCell-body": {
@@ -105,15 +94,14 @@ export const ControlledUsersSchedule = () => {
 												},
 											}}
 										>
-											<StyledTableCell
-												component="th"
-												scope="row"
-												align="center"
-											>
-												{row.entryD} {row.entryH}
+											<StyledTableCell scope="row" align="center">
+												{row.day}
 											</StyledTableCell>
-											<StyledTableCell align="center">
-												{row.departureD} {row.departureH}
+											<StyledTableCell scope="row" align="center">
+												{row.entry}
+											</StyledTableCell>
+											<StyledTableCell scope="row" align="center">
+												{row.exit}
 											</StyledTableCell>
 										</StyledTableRow>
 									))}

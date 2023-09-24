@@ -1,24 +1,22 @@
+import { Container, CssBaseline } from "@mui/material";
 import { Outlet } from "react-router-dom";
 import { Navbar } from "./components";
 
-import '@fontsource/roboto/300.css';
-import '@fontsource/roboto/400.css';
-import '@fontsource/roboto/500.css';
-import '@fontsource/roboto/700.css';
+import "@fontsource/roboto/300.css";
+import "@fontsource/roboto/400.css";
+import "@fontsource/roboto/500.css";
+import "@fontsource/roboto/700.css";
 
 export function Layout() {
-	const options: {label: string; link: string} [] = [
-        // { label: 'Inicio', link: '/' },
-        // { label: 'Servicios', link: '/servicios' },
-        // { label: 'Acerca de', link: '/acerca-de' },
-    ];
-
 	return (
 		<div>
-			<Navbar options={options} />
+			<CssBaseline />
+			<Navbar />
 
 			<main>
-				<Outlet />
+				<Container style={{ minHeight: "100vh", paddingTop: "1.5rem" }}>
+					<Outlet />
+				</Container>
 			</main>
 		</div>
 	);

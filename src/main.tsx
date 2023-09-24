@@ -5,8 +5,7 @@ import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
 
 import "./index.css";
 import { Layout } from "./Layout.tsx";
-import { Login } from "./pages";
-import { ControlledUsersSchedule } from "./pages/ControlledUsersSchedule.tsx";
+import { Login, ControlledUsersSchedule, ControlledUsersHistory } from "./pages";
 
 
 const router = createBrowserRouter([
@@ -21,6 +20,10 @@ const router = createBrowserRouter([
 			{
 				path: "/users/schedule",
 				element: <ControlledUsersSchedule />,
+			},
+			{
+				path: "/users/history",
+				element: <ControlledUsersHistory />,
 			}
 		],
 	},
