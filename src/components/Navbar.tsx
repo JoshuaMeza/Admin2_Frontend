@@ -15,6 +15,7 @@ interface PageOption {
 export const Navbar = () => {
 	const SCHEDULE = { label: "Mi horario", link: "/users/schedule" };
 	const HISTORY = { label: "Mi historial", link: "/users/history" };
+	const CLOSURE = { label: "Cerrar Sesión", link: "/" };
 
 	const location = useLocation();
 	const page_options: PageOptions = {
@@ -22,10 +23,12 @@ export const Navbar = () => {
 		"/users/schedule": [
 			{ ...SCHEDULE, active: true },
 			{ ...HISTORY, active: false },
+			{ ...CLOSURE, active: false},
 		],
 		"/users/history": [
 			{ ...SCHEDULE, active: false },
 			{ ...HISTORY, active: true },
+			{ ...CLOSURE, active: false},
 		],
 	};
 

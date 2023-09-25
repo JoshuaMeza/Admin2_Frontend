@@ -12,6 +12,9 @@ import Button, { ButtonProps } from "@mui/material/Button";
 import { styled } from "@mui/material/styles";
 import { useInitSession } from "../api";
 import { User } from "../interfaces";
+import { useNavigate } from 'react-router-dom';
+
+
 
 const ColorButton = styled(Button)<ButtonProps>(({ theme }) => ({
 	color: theme.palette.getContrastText("#CB8B2A"),
@@ -29,6 +32,8 @@ export const Login = () => {
 		password: "",
 	});
 
+	const navigate = useNavigate();
+
 	const handleClickShowPassword = () => setShowPassword((show) => !show);
 
 	const handleMouseDownPassword = (
@@ -43,6 +48,11 @@ export const Login = () => {
 		initSession.mutate(user, {
 			onSuccess: (received) => {
 				console.log(received);
+				if(received.status != false){
+					if(received.user.userType == "controlled"){
+						navigate("/users/schedule");
+					}
+				}
 			},
 		});
 	};

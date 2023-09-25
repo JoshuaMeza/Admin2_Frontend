@@ -6,9 +6,13 @@ export const useInitSession = () => {
     return useMutation({
         mutationKey: ["Login"],
         mutationFn: async (user: User) => {
-            `/test?email=${user.email}&password=${user.password}`;
-            const { data } = await httpClient.get<string>('/test');
-            return data;
+            const url = `http://localhost:8080/login/login?email=${user.email}&password=${user.password}`;
+            try{
+                const { data } = await httpClient.post<string>(url);
+                return data;
+            } catch (error) {
+                throw error;
+            }
         }
     });
 };
