@@ -1,20 +1,22 @@
 import { useState } from "react";
-import Box from "@mui/material/Box";
-import Container from "@mui/material/Container";
-import InputLabel from "@mui/material/InputLabel";
-import FormControl from "@mui/material/FormControl";
-import Input from "@mui/material/Input";
-import InputAdornment from "@mui/material/InputAdornment";
-import IconButton from "@mui/material/IconButton";
-import Visibility from "@mui/icons-material/Visibility";
-import VisibilityOff from "@mui/icons-material/VisibilityOff";
-import Button, { ButtonProps } from "@mui/material/Button";
+import { Visibility, VisibilityOff } from "@mui/icons-material";
+import { ButtonProps } from "@mui/material/Button";
 import { styled } from "@mui/material/styles";
-import { useInitSession } from "../api";
-import { User } from "../interfaces";
-import { useNavigate } from 'react-router-dom';
-
-
+import { useInitSession } from "../../api";
+import { User } from "../../interfaces";
+import { useNavigate } from "react-router-dom";
+import { destroySession, setSession } from "../../helpers";
+import {
+	Alert,
+	Box,
+	Container,
+	InputLabel,
+	FormControl,
+	Input,
+	InputAdornment,
+	IconButton,
+	Button,
+} from "@mui/material";
 
 const ColorButton = styled(Button)<ButtonProps>(({ theme }) => ({
 	color: theme.palette.getContrastText("#CB8B2A"),
@@ -25,14 +27,16 @@ const ColorButton = styled(Button)<ButtonProps>(({ theme }) => ({
 }));
 
 export const Login = () => {
+	const navigate = useNavigate();
 	const initSession = useInitSession();
 	const [showPassword, setShowPassword] = useState(false);
+	const [showErrorMessage, setShowErrorMessage] = useState(false);
 	const [user, setUser] = useState<User>({
 		email: "",
 		password: "",
 	});
 
-	const navigate = useNavigate();
+	destroySession();
 
 	const handleClickShowPassword = () => setShowPassword((show) => !show);
 
@@ -43,16 +47,20 @@ export const Login = () => {
 	};
 
 	const requestInitSession = () => {
-		console.log(user);
-
 		initSession.mutate(user, {
-			onSuccess: (received) => {
-				console.log(received);
-				if(received.status != false){
-					if(received.user.userType == "controlled"){
+			onSuccess: (data) => {
+				if (data.status) {
+					setSession(data.user);
+
+					if (data.user.userType == "controlled") {
 						navigate("/users/schedule");
+					} else {
+						navigate("/");
 					}
 				}
+			},
+			onError: () => {
+				setShowErrorMessage(true);
 			},
 		});
 	};
@@ -83,6 +91,12 @@ export const Login = () => {
 						noValidate
 						autoComplete="off"
 					>
+						{showErrorMessage ? (
+							<Alert severity="error">
+								Ocurrió un error al intentar iniciar sesión
+							</Alert>
+						) : null}
+
 						<div className="div-input-form">
 							<FormControl sx={{ m: 4, width: "90%" }} variant="standard">
 								<InputLabel htmlFor="standard-adornment-correo">
