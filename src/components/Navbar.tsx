@@ -65,14 +65,14 @@ export const Navbar = () => {
 							<Link to={option.link} key={index}>
 								{option.active ? (
 									<Button
-									sx={{ color: "#fff", backgroundColor: "#CB8B2A", "&:hover": { backgroundColor: "#C7882A" } }}
+									sx={{ color: "black", backgroundColor: "#CB8B2A", "&:hover": { backgroundColor: "#C7882A" } }}
 									variant= "contained"
 									>
 									{option.label}
 									</Button>
 								) : (
 									<Button
-									sx={{ color: "#fff", backgroundColor: "#DC7A20" }}
+									sx={{ color: "black", backgroundColor: "#DC7A20" }}
 									>
 										{option.label}
 									</Button>

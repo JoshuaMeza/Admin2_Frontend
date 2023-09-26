@@ -7,9 +7,11 @@ import TableContainer from "@mui/material/TableContainer";
 import TableHead from "@mui/material/TableHead";
 import { styled } from "@mui/material/styles";
 import TableRow from "@mui/material/TableRow";
-import { Container, Icon } from "@mui/material";
+import { Button, ButtonProps, Container, Icon, IconButton, Modal, TextField, Typography } from "@mui/material";
 import DeleteIcon from '@mui/icons-material/Delete';
 import EditIcon from '@mui/icons-material/Edit';
+import React from "react";
+import { Style } from "@mui/icons-material";
 
 const StyledTableCell = styled(TableCell)(({ theme }) => ({
 	[`&.${tableCellClasses.head}`]: {
@@ -32,6 +34,25 @@ const StyledTableRow = styled(TableRow)(({ theme }) => ({
 		border: 0,
 	},
 }));
+
+const ColorButton = styled(Button)<ButtonProps>(({ theme }) => ({
+	color: "black",
+	backgroundColor: "#CB8B2A",
+	"&:hover": {
+		backgroundColor: "#C7882A",
+	},
+}));
+
+const style = {
+	position: 'absolute' as 'absolute',
+	top: '50%',
+	left: '50%',
+	transform: 'translate(-50%, -50%)',
+	width: 450,
+	bgcolor: '#D9D9D9',
+	boxShadow: 24,
+	p: 2,
+  };
 
 function createData(
 	name: string,
@@ -63,6 +84,9 @@ const columns: readonly Column[] = [
 ];
 
 export const AdminUsersJobs = () => {
+	const [open, setOpen] = React.useState(false);
+	const handleOpen = () => setOpen(true);
+	const handleClose = () => setOpen(false);
 	return (
 		<>
 			<Container
@@ -79,7 +103,7 @@ export const AdminUsersJobs = () => {
 				>
 					<h3 style={{ marginTop: '0' }}>Tabla de puestos:</h3>
 					<Paper sx={{ width: "100%", overflow: "hidden" }}>
-						<TableContainer sx={{ maxHeight: 440 }}>
+						<TableContainer sx={{ maxHeight: 450, minHeight: 300 }}>
 							<Table stickyHeader aria-label="sticky table">
 								<TableHead>
 									<TableRow>
@@ -116,8 +140,12 @@ export const AdminUsersJobs = () => {
 												{row.area}
 											</StyledTableCell>
                                             <StyledTableCell align="center">
-                                                <EditIcon></EditIcon>
-												<DeleteIcon></DeleteIcon>
+											<IconButton aria-label="edit">
+													<EditIcon/>
+												</IconButton>
+                                                <IconButton aria-label="delete">
+													<DeleteIcon/>
+												</IconButton>
 											</StyledTableCell>
 										</StyledTableRow>
 									))}
@@ -125,6 +153,62 @@ export const AdminUsersJobs = () => {
 							</Table>
 						</TableContainer>
 					</Paper>
+					<ColorButton style={{marginTop: "15px", marginLeft: "86%"}} onClick={handleOpen}>Añadir +</ColorButton>
+					<Modal
+						open={open}
+						onClose={handleClose}
+						aria-labelledby="modal-modal-title"
+						aria-describedby="modal-modal-description"
+					>
+						<Box sx={style}>
+						<Typography id="modal-modal-title" variant="h6" component="h3">
+							Nuevo Puesto:
+						</Typography>
+						<Table>
+							<TableBody>
+								<TableRow>
+									<TableCell>
+										<Typography>Nombre: </Typography>
+									</TableCell>
+									<TableCell>
+										<TextField
+											id="outlined-size-small"
+											size="small"
+											className="input-name"
+											color="warning"
+										/>
+									</TableCell>
+								</TableRow>
+								<TableRow>
+									<TableCell>
+										<Typography>Área: </Typography>
+									</TableCell>
+									<TableCell>
+									<TextField
+											id="outlined-size-small"
+											size="small"
+											className="input-area"
+											color="warning"
+										/>
+									</TableCell>
+								</TableRow>
+							</TableBody>
+						</Table>
+						<Button 
+							variant="contained" 
+							sx={{
+								backgroundColor: "#ABABAB", 
+								color:"black", 
+								"&:hover":{
+									backgroundColor: "#C7882A",
+								},
+								marginTop: "20px",
+								marginLeft: "65%"
+							}}>
+								Añadir Puesto
+							</Button>
+						</Box>
+					</Modal>
 				</Box>
 			</Container>
 		</>
