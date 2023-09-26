@@ -10,8 +10,7 @@ import TableRow from "@mui/material/TableRow";
 import { Button, ButtonProps, Container, Icon, IconButton, Modal, TextField, Typography } from "@mui/material";
 import DeleteIcon from '@mui/icons-material/Delete';
 import EditIcon from '@mui/icons-material/Edit';
-import React from "react";
-import { Style } from "@mui/icons-material";
+import React, { useState } from "react";
 
 const StyledTableCell = styled(TableCell)(({ theme }) => ({
 	[`&.${tableCellClasses.head}`]: {
@@ -84,9 +83,23 @@ const columns: readonly Column[] = [
 ];
 
 export const AdminUsersJobs = () => {
-	const [open, setOpen] = React.useState(false);
-	const handleOpen = () => setOpen(true);
-	const handleClose = () => setOpen(false);
+	const [editName, setEditName] = React.useState("");
+	const [editArea, setEditArea] = React.useState("");
+	const [openAdd, setOpenAdd] = React.useState(false);
+	const [openEdit, setOpenEdit] = React.useState(false);
+	const handleOpenAdd = () => setOpenAdd(true);
+	
+	const handleOpenEdit = (name: string, area: string) => {
+		setEditName(name);
+		setEditArea(area);
+		setOpenEdit(true);
+	}
+	const handleCloseAdd = () => setOpenAdd(false);
+	const handleCloseEdit = () => {
+		setEditName("");
+		setEditArea("");
+		setOpenEdit(false);
+	}
 	return (
 		<>
 			<Container
@@ -140,7 +153,7 @@ export const AdminUsersJobs = () => {
 												{row.area}
 											</StyledTableCell>
                                             <StyledTableCell align="center">
-											<IconButton aria-label="edit">
+											<IconButton aria-label="edit" onClick={() => handleOpenEdit(row.name, row.area)}>
 													<EditIcon/>
 												</IconButton>
                                                 <IconButton aria-label="delete">
@@ -153,10 +166,10 @@ export const AdminUsersJobs = () => {
 							</Table>
 						</TableContainer>
 					</Paper>
-					<ColorButton style={{marginTop: "15px", marginLeft: "86%"}} onClick={handleOpen}>Añadir +</ColorButton>
+					<ColorButton style={{marginTop: "15px", marginLeft: "86%"}} onClick={handleOpenAdd}>Añadir +</ColorButton>
 					<Modal
-						open={open}
-						onClose={handleClose}
+						open={openAdd}
+						onClose={handleCloseAdd}
 						aria-labelledby="modal-modal-title"
 						aria-describedby="modal-modal-description"
 					>
@@ -184,11 +197,11 @@ export const AdminUsersJobs = () => {
 										<Typography>Área: </Typography>
 									</TableCell>
 									<TableCell>
-									<TextField
-											id="outlined-size-small"
-											size="small"
-											className="input-area"
-											color="warning"
+										<TextField
+												id="outlined-size-small"
+												size="small"
+												className="input-area"
+												color="warning"
 										/>
 									</TableCell>
 								</TableRow>
@@ -207,6 +220,50 @@ export const AdminUsersJobs = () => {
 							}}>
 								Añadir Puesto
 							</Button>
+						</Box>
+					</Modal>
+					<Modal
+						open={openEdit}
+						onClose={handleCloseEdit}
+						aria-labelledby="modal-modal-title"
+						aria-describedby="modal-modal-description"
+					>
+						<Box sx={style}>
+							<Typography id="modal-modal-title" variant="h6" component="h3">
+								Editar Puesto:
+							</Typography>
+							<Table>
+							<TableBody>
+								<TableRow>
+									<TableCell>
+										<Typography>Nombre: </Typography>
+									</TableCell>
+									<TableCell>
+										<TextField
+											id="outlined-size-small"
+											size="small"
+											className="input-name"
+											color="warning"
+											defaultValue={editName}
+										/>
+									</TableCell>
+								</TableRow>
+								<TableRow>
+									<TableCell>
+										<Typography>Área: </Typography>
+									</TableCell>
+									<TableCell>
+									<TextField
+											id="outlined-size-small"
+											size="small"
+											className="input-area"
+											color="warning"
+											defaultValue={editArea}
+										/>
+									</TableCell>
+								</TableRow>
+							</TableBody>
+						</Table>
 						</Box>
 					</Modal>
 				</Box>

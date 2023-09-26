@@ -53,10 +53,9 @@ export const Login = () => {
 					setSession(data.user);
 
 					if (data.user.userType == "controlled") {
-						navigate("/users/schedule");
-					} else {
-						navigate("/");
-					}
+						return navigate("/users/schedule");
+					} 
+					navigate("/admin/jobs");
 				}
 			},
 			onError: () => {
