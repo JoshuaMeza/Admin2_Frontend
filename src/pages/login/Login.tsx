@@ -1,6 +1,5 @@
 import { useState } from "react";
 import { Visibility, VisibilityOff } from "@mui/icons-material";
-import { ButtonProps } from "@mui/material/Button";
 import { styled } from "@mui/material/styles";
 import { useInitSession } from "../../api";
 import { User } from "../../interfaces";
@@ -16,6 +15,7 @@ import {
 	InputAdornment,
 	IconButton,
 	Button,
+	ButtonProps
 } from "@mui/material";
 
 const ColorButton = styled(Button)<ButtonProps>(({ theme }) => ({

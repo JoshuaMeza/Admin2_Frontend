@@ -1,4 +1,5 @@
-import { Button, AppBar, Box, Toolbar, Typography } from "@mui/material";
+import { Button, AppBar, Box, Toolbar, Typography, ButtonProps } from "@mui/material";
+import { styled } from "@mui/material/styles";
 import { useLocation } from "react-router-dom";
 import { Link } from "react-router-dom";
 
@@ -16,6 +17,8 @@ export const Navbar = () => {
 	const SCHEDULE = { label: "Mi horario", link: "/users/schedule" };
 	const HISTORY = { label: "Mi historial", link: "/users/history" };
 	const CLOSURE = { label: "Cerrar Sesión", link: "/" };
+	const JOBS = { label: "Puestos de Trabajo", link: "/admin/jobs" };
+	const EMPLOYEES = { label: "Empleados", link: "/admin/employees" };
 
 	const location = useLocation();
 	const page_options: PageOptions = {
@@ -23,13 +26,23 @@ export const Navbar = () => {
 		"/users/schedule": [
 			{ ...SCHEDULE, active: true },
 			{ ...HISTORY, active: false },
-			{ ...CLOSURE, active: false},
+			{ ...CLOSURE, active: false },
 		],
 		"/users/history": [
 			{ ...SCHEDULE, active: false },
 			{ ...HISTORY, active: true },
-			{ ...CLOSURE, active: false},
+			{ ...CLOSURE, active: false },
 		],
+		"/admin/jobs": [
+			{ ...JOBS, active: true},
+			{ ...EMPLOYEES, active: false },
+			{ ...CLOSURE, active: false },
+		],
+		"/admin/employees": [
+			{ ...JOBS, active: false },
+			{ ...EMPLOYEES, active: true },
+			{ ...CLOSURE, active: false },
+		]
 	};
 
 	return (
@@ -50,12 +63,21 @@ export const Navbar = () => {
 					<Box>
 						{page_options[location.pathname].map((option, index) => (
 							<Link to={option.link} key={index}>
-								<Button
-									sx={{ color: "#fff" }}
-									variant={option.active ? "contained" : "text"}
-								>
+								{option.active ? (
+									<Button
+									sx={{ color: "#fff", backgroundColor: "#CB8B2A", "&:hover": { backgroundColor: "#C7882A" } }}
+									variant= "contained"
+									>
 									{option.label}
-								</Button>
+									</Button>
+								) : (
+									<Button
+									sx={{ color: "#fff", backgroundColor: "#DC7A20" }}
+									>
+										{option.label}
+									</Button>
+								)
+								}
 							</Link>
 						))}
 					</Box>
