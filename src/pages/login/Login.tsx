@@ -15,7 +15,8 @@ import {
 	InputAdornment,
 	IconButton,
 	Button,
-	ButtonProps
+	ButtonProps,
+	AlertColor,
 } from "@mui/material";
 
 const ColorButton = styled(Button)<ButtonProps>(({ theme }) => ({
@@ -26,11 +27,21 @@ const ColorButton = styled(Button)<ButtonProps>(({ theme }) => ({
 	},
 }));
 
+interface AlertData {
+	show: boolean;
+	type: AlertColor;
+	message: string;
+}
+
 export const Login = () => {
 	const navigate = useNavigate();
 	const initSession = useInitSession();
 	const [showPassword, setShowPassword] = useState(false);
-	const [showErrorMessage, setShowErrorMessage] = useState(false);
+	const [showMessage, setShowMessage] = useState<AlertData>({
+		show: false,
+		type: "info",
+		message: "",
+	});
 	const [user, setUser] = useState<User>({
 		email: "",
 		password: "",
@@ -53,13 +64,24 @@ export const Login = () => {
 					setSession(data.user);
 
 					if (data.user.userType == "controlled") {
-						return navigate("/users/schedule");
-					} 
-					navigate("/admin/jobs");
+						navigate("/users/schedule");
+					} else {
+						navigate("/admin/jobs");
+					}
+				} else {
+					setShowMessage({
+						show: true,
+						type: "warning",
+						message: "Los datos proporcionados no son correctos",
+					});
 				}
 			},
 			onError: () => {
-				setShowErrorMessage(true);
+				setShowMessage({
+					show: true,
+					type: "error",
+					message: "Ocurrió un error al intentar iniciar sesión",
+				});
 			},
 		});
 	};
@@ -90,10 +112,8 @@ export const Login = () => {
 						noValidate
 						autoComplete="off"
 					>
-						{showErrorMessage ? (
-							<Alert severity="error">
-								Ocurrió un error al intentar iniciar sesión
-							</Alert>
+						{showMessage.show ? (
+							<Alert severity={showMessage.type}>{showMessage.message}</Alert>
 						) : null}
 
 						<div className="div-input-form">

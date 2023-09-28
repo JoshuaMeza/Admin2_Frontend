@@ -12,7 +12,7 @@ export const useInitSession = () => {
 		mutationKey: ["Login"],
 		mutationFn: async (user: User) => {
 			const { data } = await httpClient.post<SessionUserResponse>(
-				"/login/login?email=" + user.email + "&password=" + user.password,
+				"/login/",
 				{
 					...user,
 				}
