@@ -3,6 +3,8 @@ import EditIcon from "@mui/icons-material/Edit";
 import AccessTimeIcon from "@mui/icons-material/AccessTime";
 import {
 	Box,
+	Button,
+	ButtonProps,
 	Container,
 	IconButton,
 	List,
@@ -18,6 +20,7 @@ import {
 	styled,
 	tableCellClasses,
 } from "@mui/material";
+import { useNavigate } from "react-router-dom";
 
 const StyledTableCell = styled(TableCell)(({ theme }) => ({
 	[`&.${tableCellClasses.head}`]: {
@@ -40,6 +43,14 @@ const StyledTableRow = styled(TableRow)(({ theme }) => ({
 	},
 }));
 
+const ColorButton = styled(Button)<ButtonProps>(() => ({
+	color: "black",
+	backgroundColor: "#CB8B2A",
+	"&:hover": {
+		backgroundColor: "#C7882A",
+	},
+}));
+
 interface Column {
 	id: string;
 	label: string;
@@ -47,6 +58,8 @@ interface Column {
 }
 
 export const AdminUsersEmployees = () => {
+	const navigate = useNavigate();
+
 	const columns: Column[] = [
 		{ id: "name", label: "Nombre", minWidth: 120 },
 		{ id: "job", label: "Puesto", minWidth: 120 },
@@ -86,8 +99,12 @@ export const AdminUsersEmployees = () => {
 		},
 	];
 
+	const handleNewEmployee = () => {
+		navigate("/admin/employees/new");
+	};
+
 	const hanldeEditEmployee = (id: number) => {
-		console.log(id);
+		navigate("/admin/employees/edit", { state: { employee_id: id } });
 	};
 
 	const hanldeRemoveEmployee = (id: number) => {
@@ -184,6 +201,13 @@ export const AdminUsersEmployees = () => {
 							</Table>
 						</TableContainer>
 					</Paper>
+
+					<ColorButton
+						style={{ marginTop: "15px", marginLeft: "86%" }}
+						onClick={() => handleNewEmployee()}
+					>
+						Añadir +
+					</ColorButton>
 				</Box>
 			</Container>
 		</>

@@ -11,6 +11,8 @@ import {
 	ControlledUsersHistory,
 	AdminUsersJobs,
 	AdminUsersEmployees,
+	AdminUsersEmployeesNew,
+	AdminUsersEmployeesEdit,
 } from "./pages";
 
 const router = createBrowserRouter([
@@ -37,6 +39,14 @@ const router = createBrowserRouter([
 			{
 				path: "/admin/employees",
 				element: <AdminUsersEmployees />,
+			},
+			{
+				path: "/admin/employees/new",
+				element: <AdminUsersEmployeesNew />,
+			},
+			{
+				path: "/admin/employees/edit",
+				element: <AdminUsersEmployeesEdit />,
 			},
 		],
 	},
