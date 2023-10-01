@@ -42,6 +42,11 @@ export const Navbar = () => {
 			{ ...JOBS, active: false },
 			{ ...EMPLOYEES, active: true },
 			{ ...CLOSURE, active: false },
+		],
+		"/admin/employees/new": [
+			{ ...JOBS, active: false },
+			{ ...EMPLOYEES, active: true },
+			{ ...CLOSURE, active: false },
 		]
 	};
 
