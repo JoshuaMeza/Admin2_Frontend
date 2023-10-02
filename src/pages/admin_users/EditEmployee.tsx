@@ -1,7 +1,7 @@
 import { useEffect } from "react";
 import { useLocation } from "react-router-dom";
 
-export const AdminUsersEmployeesEdit = () => {
+export const AdminUsersEditEmployee = () => {
 	const location = useLocation();
 
 	useEffect(() => {

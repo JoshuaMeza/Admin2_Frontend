@@ -1,4 +1,4 @@
 export * from "./Jobs";
 export * from "./Employees";
-export * from "./EmployeesNew";
-export * from "./EmployeesEdit";
+export * from "./EditEmployee";
+export * from "./NewEmployee";

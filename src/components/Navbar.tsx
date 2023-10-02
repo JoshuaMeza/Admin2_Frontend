@@ -56,10 +56,7 @@ export const Navbar = () => {
 
 	return (
 		<Box sx={{ display: "flex" }}>
-			<AppBar
-				position="static"
-				style={{ backgroundColor: "#DC7A20", padding: "0.3rem 0.5rem" }}
-			>
+			<AppBar position="static" style={{ backgroundColor: "#DC7A20", padding: "0.3rem 0.5rem" }}>
 				<Toolbar variant="dense">
 					<Typography
 						variant="h4"
