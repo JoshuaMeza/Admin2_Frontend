@@ -10,7 +10,11 @@ import TableRow from "@mui/material/TableRow";
 import { Button, ButtonProps, Container, Icon, IconButton, Modal, TextField, Typography } from "@mui/material";
 import DeleteIcon from '@mui/icons-material/Delete';
 import EditIcon from '@mui/icons-material/Edit';
-import React, { useState } from "react";
+import { useGetJobs, useCreateJob, useUpdateJob, useDeleteJob } from "../../api";
+import React, { useState, useEffect } from "react";
+import { EditableJob,Job } from "../../interfaces";
+
+
 
 const StyledTableCell = styled(TableCell)(({ theme }) => ({
 	[`&.${tableCellClasses.head}`]: {
@@ -53,21 +57,6 @@ const style = {
 	p: 2,
   };
 
-function createData(
-	name: string,
-	area: string,
-) {
-	return { name, area };
-}
-
-const rows = [
-	createData("Químico", "Producción"),
-    createData("Seguridad", "Infraestructura"),
-    createData("Contador", "Contaduría"),
-    createData("Líder de Proyecto", "Producción"),
-    createData("Intendencia", "Infraestructura"),
-];
-
 interface Column {
 	id: "job" | "department" | "operations";
 	label: string;
@@ -83,23 +72,120 @@ const columns: readonly Column[] = [
 ];
 
 export const AdminUsersJobs = () => {
-	const [editName, setEditName] = React.useState("");
-	const [editArea, setEditArea] = React.useState("");
+	const getJobs = useGetJobs();
+	const createJob = useCreateJob();
+	const updateJob = useUpdateJob();
+	const deleteJob = useDeleteJob();
 	const [openAdd, setOpenAdd] = React.useState(false);
 	const [openEdit, setOpenEdit] = React.useState(false);
+	const [openDelete, setOpenDelete] = React.useState(false);
 	const handleOpenAdd = () => setOpenAdd(true);
-	
-	const handleOpenEdit = (name: string, area: string) => {
-		setEditName(name);
-		setEditArea(area);
+	const handleOpenEdit = (job: EditableJob) => {
+		setEditableJob(job);
 		setOpenEdit(true);
+	}
+	const handleOpenDelete = (job: EditableJob) => {
+		setEditableJob(job);
+		setOpenDelete(true);
 	}
 	const handleCloseAdd = () => setOpenAdd(false);
 	const handleCloseEdit = () => {
-		setEditName("");
-		setEditArea("");
+		var newJob: EditableJob = {
+			id: 0,
+			name: "",
+			area: "",
+		}
+		setEditableJob(newJob);
 		setOpenEdit(false);
 	}
+	const handleCloseDelete = () => {
+		var newJob: EditableJob = {
+			id: 0,
+			name: "",
+			area: "",
+		}
+		setEditableJob(newJob);
+		setOpenDelete(false);
+	}
+
+	useEffect(() => {
+		requestJobs();
+	}, []);
+
+	const [rows, setRows] = useState<[EditableJob]>([
+		{
+			id: 0,
+			name: "",
+			area: "",
+		}
+	]);
+
+	const [job, setJob] = useState<Job>(
+		{
+			name: "",
+			area: "",
+		}
+	);
+
+	const [editableJob, setEditableJob] = useState<EditableJob>(
+		{
+			id: 0,
+			name: "",
+			area: "",
+		}
+	);
+	
+	const requestJobs = () => {
+		getJobs.mutate(rows, {
+			onSuccess: (data) => {
+				console.log(data);
+				setRows(data);
+			},
+			onError: () => {
+				console.log("Error al cargar puestos de trabajo")
+			}
+		})
+
+	}
+	
+	const requestCreateJob = () => {
+		createJob.mutate(job, {
+			onSuccess: (data) => {
+				console.log("Puesto de trabajo creado con éxito");
+				window.location.reload();
+			}, 
+			onError: () => {
+				console.log("Error al crear puesto de trabajo");
+			}
+		})
+	}
+
+	const requestUpdateJob = () => {
+		updateJob.mutate(editableJob, {
+			onSuccess: (data) => {
+				console.log("Puesto de trabajo actualizado");
+				window.location.reload();
+			},
+			onError: () => {
+				console.log("Error al tratar de actualizar el puesto de trabajo");
+			}
+		});
+	}
+
+	const requestDeleteJob = () => {
+		deleteJob.mutate(editableJob, {
+			onSuccess: (data) => {
+				console.log("Puesto de trabajo eliminado");
+				window.location.reload();
+			},
+			onError: () => {
+				console.log("Error al tratar de eliminar el puesto de trabajo");
+			}
+		});
+	}
+	
+	
+
 	return (
 		<>
 			<Container
@@ -134,7 +220,7 @@ export const AdminUsersJobs = () => {
 								<TableBody>
 									{rows.map((row) => (
 										<StyledTableRow
-											key={row.name}
+											key={row.id}
 											sx={{
 												"&:last-child td, &:last-child th": { border: 0 },
 												"&:nth-of-type(odd) .MuiTableCell-body": {
@@ -153,10 +239,10 @@ export const AdminUsersJobs = () => {
 												{row.area}
 											</StyledTableCell>
                                             <StyledTableCell align="center">
-											<IconButton aria-label="edit" onClick={() => handleOpenEdit(row.name, row.area)}>
+											<IconButton aria-label="edit" onClick={() => handleOpenEdit(row)}>
 													<EditIcon/>
 												</IconButton>
-                                                <IconButton aria-label="delete">
+                                                <IconButton aria-label="delete" onClick={() => handleOpenDelete(row)}>
 													<DeleteIcon/>
 												</IconButton>
 											</StyledTableCell>
@@ -174,51 +260,55 @@ export const AdminUsersJobs = () => {
 						aria-describedby="modal-modal-description"
 					>
 						<Box sx={style}>
-						<Typography id="modal-modal-title" variant="h6" component="h3">
-							Nuevo Puesto:
-						</Typography>
-						<Table>
-							<TableBody>
-								<TableRow>
-									<TableCell>
-										<Typography>Nombre: </Typography>
-									</TableCell>
-									<TableCell>
-										<TextField
-											id="outlined-size-small"
-											size="small"
-											className="input-name"
-											color="warning"
-										/>
-									</TableCell>
-								</TableRow>
-								<TableRow>
-									<TableCell>
-										<Typography>Área: </Typography>
-									</TableCell>
-									<TableCell>
-										<TextField
+							<Typography id="modal-modal-title" variant="h6" component="h3">
+								Nuevo Puesto:
+							</Typography>
+							<Table>
+								<TableBody>
+									<TableRow>
+										<TableCell>
+											<Typography>Nombre: </Typography>
+										</TableCell>
+										<TableCell>
+											<TextField
 												id="outlined-size-small"
 												size="small"
-												className="input-area"
+												className="input-name"
 												color="warning"
-										/>
-									</TableCell>
-								</TableRow>
-							</TableBody>
-						</Table>
-						<Button 
-							variant="contained" 
-							sx={{
-								backgroundColor: "#ABABAB", 
-								color:"black", 
-								"&:hover":{
-									backgroundColor: "#C7882A",
-								},
-								marginTop: "20px",
-								marginLeft: "65%"
-							}}>
-								Añadir Puesto
+												onChange={(e) => setJob({ ...job, name: e.target.value})}
+											/>
+										</TableCell>
+									</TableRow>
+									<TableRow>
+										<TableCell>
+											<Typography>Área: </Typography>
+										</TableCell>
+										<TableCell>
+											<TextField
+													id="outlined-size-small"
+													size="small"
+													className="input-area"
+													color="warning"
+													onChange={(e) => setJob({ ...job, area: e.target.value})}
+											/>
+										</TableCell>
+									</TableRow>
+								</TableBody>
+							</Table>
+							<Button 
+								variant="contained" 
+								sx={{
+									backgroundColor: "#ABABAB", 
+									color:"black", 
+									"&:hover":{
+										backgroundColor: "#C7882A",
+									},
+									marginTop: "20px",
+									marginLeft: "65%"
+								}}
+								onClick={requestCreateJob}
+								>
+									Añadir Puesto
 							</Button>
 						</Box>
 					</Modal>
@@ -244,7 +334,8 @@ export const AdminUsersJobs = () => {
 											size="small"
 											className="input-name"
 											color="warning"
-											defaultValue={editName}
+											defaultValue={editableJob.name}
+											onChange={(e) => setEditableJob({ ...editableJob, name: e.target.value})}
 										/>
 									</TableCell>
 								</TableRow>
@@ -258,12 +349,91 @@ export const AdminUsersJobs = () => {
 											size="small"
 											className="input-area"
 											color="warning"
-											defaultValue={editArea}
+											defaultValue={editableJob.area}
+											onChange={(e) => setEditableJob({ ...editableJob, area: e.target.value})}
 										/>
 									</TableCell>
 								</TableRow>
 							</TableBody>
 						</Table>
+						<Button 
+							variant="contained" 
+							sx={{
+								backgroundColor: "#ABABAB", 
+								color:"black", 
+								"&:hover":{
+									backgroundColor: "#C7882A",
+								},
+								marginTop: "20px",
+								marginLeft: "65%"
+								
+							}}
+							onClick={requestUpdateJob}
+							>
+								Editar Puesto
+							</Button>
+						</Box>
+					</Modal>
+					<Modal
+						open={openDelete}
+						onClose={handleCloseDelete}
+						aria-labelledby="modal-modal-title"
+						aria-describedby="modal-modal-description"
+					>
+						<Box sx={style}>
+							<Typography id="modal-modal-title" variant="h6" component="h3">
+								¿Desea eliminar el puesto?
+							</Typography>
+							<Table>
+							<TableBody>
+								<TableRow>
+									<TableCell>
+										<Typography>Nombre: </Typography>
+									</TableCell>
+									<TableCell>
+										<TextField
+											id="outlined-size-small"
+											size="small"
+											className="input-name"
+											color="warning"
+											defaultValue={editableJob.name}
+											disabled
+										/>
+									</TableCell>
+								</TableRow>
+								<TableRow>
+									<TableCell>
+										<Typography>Área: </Typography>
+									</TableCell>
+									<TableCell>
+									<TextField
+											id="outlined-size-small"
+											size="small"
+											className="input-area"
+											color="warning"
+											defaultValue={editableJob.area}
+											disabled
+										/>
+									</TableCell>
+								</TableRow>
+							</TableBody>
+						</Table>
+						<Button 
+							variant="contained" 
+							sx={{
+								backgroundColor: "#ABABAB", 
+								color:"black", 
+								"&:hover":{
+									backgroundColor: "#C7882A",
+								},
+								marginTop: "20px",
+								marginLeft: "60%"
+								
+							}}
+							onClick={requestDeleteJob}
+							>
+								Eliminar Puesto
+							</Button>
 						</Box>
 					</Modal>
 				</Box>
