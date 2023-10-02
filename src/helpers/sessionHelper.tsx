@@ -18,3 +18,7 @@ export const getSession = (): SessionUser => {
 export const destroySession = (): void => {
 	sessionStorage.removeItem(SESSION_KEY);
 };
+
+export const hasActiveSession = (): boolean => {
+	return sessionStorage.getItem(SESSION_KEY) != null;
+};

@@ -4,7 +4,7 @@ import { styled } from "@mui/material/styles";
 import { useInitSession } from "../../api";
 import { User } from "../../interfaces";
 import { useNavigate } from "react-router-dom";
-import { destroySession, setSession } from "../../helpers";
+import { setSession } from "../../helpers";
 import {
 	Alert,
 	Box,
@@ -47,13 +47,9 @@ export const Login = () => {
 		password: "",
 	});
 
-	destroySession();
-
 	const handleClickShowPassword = () => setShowPassword((show) => !show);
 
-	const handleMouseDownPassword = (
-		event: React.MouseEvent<HTMLButtonElement>
-	) => {
+	const handleMouseDownPassword = (event: React.MouseEvent<HTMLButtonElement>) => {
 		event.preventDefault();
 	};
 
@@ -97,9 +93,7 @@ export const Login = () => {
 					justifyContent: "center",
 				}}
 			>
-				<Box
-					sx={{ minWidth: "70%", bgcolor: "#F0EFEF", padding: "4rem 1.5rem" }}
-				>
+				<Box sx={{ minWidth: "70%", bgcolor: "#F0EFEF", padding: "4rem 1.5rem" }}>
 					<div>
 						<h2>Bienvenido al sistema AMS</h2>
 					</div>
@@ -118,9 +112,7 @@ export const Login = () => {
 
 						<div className="div-input-form">
 							<FormControl sx={{ m: 4, width: "90%" }} variant="standard">
-								<InputLabel htmlFor="standard-adornment-correo">
-									Correo
-								</InputLabel>
+								<InputLabel htmlFor="standard-adornment-correo">Correo</InputLabel>
 								<Input
 									id="standard-adornment-amount"
 									onChange={(e) => setUser({ ...user, email: e.target.value })}
@@ -129,15 +121,11 @@ export const Login = () => {
 						</div>
 						<div className="div-input-form">
 							<FormControl sx={{ m: 4, width: "90%" }} variant="standard">
-								<InputLabel htmlFor="standard-adornment-password">
-									Contraseña
-								</InputLabel>
+								<InputLabel htmlFor="standard-adornment-password">Contraseña</InputLabel>
 								<Input
 									id="filled-adornment-password"
 									type={showPassword ? "text" : "password"}
-									onChange={(e) =>
-										setUser({ ...user, password: e.target.value })
-									}
+									onChange={(e) => setUser({ ...user, password: e.target.value })}
 									endAdornment={
 										<InputAdornment position="end">
 											<IconButton

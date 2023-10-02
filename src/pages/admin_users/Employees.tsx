@@ -21,6 +21,11 @@ import {
 	tableCellClasses,
 } from "@mui/material";
 import { useNavigate } from "react-router-dom";
+import { useEffect, useState } from "react";
+import { useGetAllEmployees, useGetSchedulesOfEmployee } from "../../api";
+import { ControlledUser, Schedule } from "../../interfaces";
+import { DayRemoteId } from "../../constants";
+import dayjs from "dayjs";
 
 const StyledTableCell = styled(TableCell)(({ theme }) => ({
 	[`&.${tableCellClasses.head}`]: {
@@ -59,6 +64,9 @@ interface Column {
 
 export const AdminUsersEmployees = () => {
 	const navigate = useNavigate();
+	const getAllEmployees = useGetAllEmployees();
+	const getSchedulesOfEmployee = useGetSchedulesOfEmployee();
+	const [employees, setEmployees] = useState<ControlledUser[]>([]);
 
 	const columns: Column[] = [
 		{ id: "name", label: "Nombre", minWidth: 120 },
@@ -68,36 +76,45 @@ export const AdminUsersEmployees = () => {
 		{ id: "operations", label: "Operaciones", minWidth: 120 },
 	];
 
-	const rows = [
-		{
-			id: 1,
-			name: "Ana Gomez",
-			job: "Quimico",
-			schedules: ["09:00 - 11:00", "13:00 - 16:00"],
-			presence: true,
-		},
-		{
-			id: 2,
-			name: "Marco Ortiz",
-			job: "Seguridad",
-			schedules: ["07:00 - 15:00"],
-			presence: true,
-		},
-		{
-			id: 3,
-			name: "Diego Lomas",
-			job: "Quimico",
-			schedules: ["14:00 - 20:00"],
-			presence: false,
-		},
-		{
-			id: 4,
-			name: "Rosa Ek",
-			job: "Lider de proyecto",
-			schedules: ["09:00 - 17:00"],
-			presence: true,
-		},
-	];
+	const days: { [key: number]: number } = {
+		0: DayRemoteId.Sunday,
+		1: DayRemoteId.Monday,
+		2: DayRemoteId.Tuesday,
+		3: DayRemoteId.Wednesday,
+		4: DayRemoteId.Thursday,
+		5: DayRemoteId.Friday,
+		6: DayRemoteId.Saturday,
+	};
+
+	useEffect(() => {
+		loadEmployees();
+	}, []);
+
+	const loadEmployees = () => {
+		getAllEmployees.mutate(undefined, {
+			onSuccess(data) {
+				data.forEach((employee) => {
+					loadSchedulesOfEmployee(employee);
+				});
+				setEmployees(data);
+			},
+		});
+	};
+
+	const loadSchedulesOfEmployee = (employee: ControlledUser) => {
+		getSchedulesOfEmployee.mutate(employee.id, {
+			onSuccess(data) {
+				employee.schedules = data;
+			},
+			onError() {
+				employee.schedules = [];
+			},
+		});
+	};
+
+	const isToday = (schedule: Schedule) => {
+		return days[dayjs().day()] == schedule.entryDay.id;
+	};
 
 	const handleNewEmployee = () => {
 		navigate("/admin/employees/new");
@@ -126,9 +143,7 @@ export const AdminUsersEmployees = () => {
 					justifyContent: "center",
 				}}
 			>
-				<Box
-					sx={{ minWidth: "70%", bgcolor: "#F0EFEF", padding: "2.5rem 1.5rem" }}
-				>
+				<Box sx={{ minWidth: "70%", bgcolor: "#F0EFEF", padding: "2.5rem 1.5rem" }}>
 					<h2 style={{ marginTop: "0" }}>Tabla de empleados</h2>
 
 					<Paper sx={{ width: "100%", overflow: "hidden" }}>
@@ -148,9 +163,58 @@ export const AdminUsersEmployees = () => {
 									</TableRow>
 								</TableHead>
 								<TableBody>
-									{rows.map((employee) => (
+									{employees && employees.length > 0 ? (
+										employees.map((employee) => (
+											<StyledTableRow
+												key={employee.id}
+												sx={{
+													"&:last-child td, &:last-child th": { border: 0 },
+													"&:nth-of-type(odd) .MuiTableCell-body": {
+														color: "#CB8B2A",
+													},
+												}}
+											>
+												<StyledTableCell scope="row" align="center">
+													{employee.name}
+												</StyledTableCell>
+												<StyledTableCell scope="row" align="center">
+													{employee.jobDescription}
+												</StyledTableCell>
+												<StyledTableCell scope="row" align="center">
+													<List style={{ padding: "0" }}>
+														{employee.schedules
+															?.filter((schedule) => isToday(schedule))
+															.map((schedule) => (
+																<ListItem
+																	key={schedule.id}
+																	style={{ padding: "0", textAlign: "center" }}
+																>
+																	<ListItemText
+																		primary={`${schedule.entryTime} - ${schedule.exitTime}`}
+																	/>
+																</ListItem>
+															))}
+													</List>
+												</StyledTableCell>
+												<StyledTableCell scope="row" align="center">
+													{employee.present ? "Presente" : "Ausente"}
+												</StyledTableCell>
+												<StyledTableCell scope="row" align="center">
+													<IconButton onClick={() => hanldeEditEmployee(employee.id)}>
+														<EditIcon />
+													</IconButton>
+													<IconButton onClick={() => hanldeRemoveEmployee(employee.id)}>
+														<DeleteIcon />
+													</IconButton>
+													<IconButton onClick={() => hanldeShowSchedulesOfEmployee(employee.id)}>
+														<AccessTimeIcon />
+													</IconButton>
+												</StyledTableCell>
+											</StyledTableRow>
+										))
+									) : (
 										<StyledTableRow
-											key={employee.id}
+											key={0}
 											sx={{
 												"&:last-child td, &:last-child th": { border: 0 },
 												"&:nth-of-type(odd) .MuiTableCell-body": {
@@ -158,45 +222,11 @@ export const AdminUsersEmployees = () => {
 												},
 											}}
 										>
-											<StyledTableCell scope="row" align="center">
-												{employee.name}
-											</StyledTableCell>
-											<StyledTableCell scope="row" align="center">
-												{employee.job}
-											</StyledTableCell>
-											<StyledTableCell scope="row" align="center">
-												<List style={{ padding: "0" }}>
-													{employee.schedules.map((schedule, index) => (
-														<ListItem key={index} style={{ padding: "0" }}>
-															<ListItemText primary={schedule} />
-														</ListItem>
-													))}
-												</List>
-											</StyledTableCell>
-											<StyledTableCell scope="row" align="center">
-												{employee.presence ? "Presente" : "Ausente"}
-											</StyledTableCell>
-											<StyledTableCell scope="row" align="center">
-												<IconButton
-													onClick={() => hanldeEditEmployee(employee.id)}
-												>
-													<EditIcon />
-												</IconButton>
-												<IconButton
-													onClick={() => hanldeRemoveEmployee(employee.id)}
-												>
-													<DeleteIcon />
-												</IconButton>
-												<IconButton
-													onClick={() =>
-														hanldeShowSchedulesOfEmployee(employee.id)
-													}
-												>
-													<AccessTimeIcon />
-												</IconButton>
+											<StyledTableCell scope="row" align="center" colSpan={5}>
+												No hay empleados para mostrar
 											</StyledTableCell>
 										</StyledTableRow>
-									))}
+									)}
 								</TableBody>
 							</Table>
 						</TableContainer>
