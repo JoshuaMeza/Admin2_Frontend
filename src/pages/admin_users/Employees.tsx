@@ -16,16 +16,20 @@ import {
 	TableCell,
 	TableContainer,
 	TableHead,
+	TablePagination,
 	TableRow,
 	styled,
 	tableCellClasses,
 } from "@mui/material";
 import { useNavigate } from "react-router-dom";
 import { useEffect, useState } from "react";
-import { useGetAllEmployees, useGetSchedulesOfEmployee } from "../../api";
-import { ControlledUser, Schedule } from "../../interfaces";
+import { useDeactivateEmployee, useGetAllEmployees, useGetSchedulesOfEmployee } from "../../api";
+import { ControlledUser, Pagination, Schedule } from "../../interfaces";
 import { DayRemoteId } from "../../constants";
 import dayjs from "dayjs";
+import { SchedulesModal } from "../../components/SchedulesModal";
+import { useToggle } from "../../hooks";
+import { DeleteAlertDialog } from "../../components/DeleteAlertDialog";
 
 const StyledTableCell = styled(TableCell)(({ theme }) => ({
 	[`&.${tableCellClasses.head}`]: {
@@ -66,7 +70,20 @@ export const AdminUsersEmployees = () => {
 	const navigate = useNavigate();
 	const getAllEmployees = useGetAllEmployees();
 	const getSchedulesOfEmployee = useGetSchedulesOfEmployee();
+	const deactivateEmployee = useDeactivateEmployee();
 	const [employees, setEmployees] = useState<ControlledUser[]>([]);
+	const [isOpenDeleteEmployee, toggleDeleteEmployee] = useToggle();
+	const [isOpenSchedules, toggleSchedules] = useToggle();
+	const [currentEmployee, setCurrentEmployee] = useState<ControlledUser>({
+		id: 0,
+		name: "",
+		email: "",
+		salary: 0,
+		jobDescription: "",
+		present: false,
+		schedules: undefined,
+		job: undefined,
+	});
 
 	const columns: Column[] = [
 		{ id: "name", label: "Nombre", minWidth: 120 },
@@ -86,28 +103,27 @@ export const AdminUsersEmployees = () => {
 		6: DayRemoteId.Saturday,
 	};
 
-	useEffect(() => {
-		loadEmployees();
-	}, []);
+	const [page, setPage] = useState(0);
+	const [rowsPerPage, setRowsPerPage] = useState(5);
 
-	const loadEmployees = () => {
-		getAllEmployees.mutate(undefined, {
-			onSuccess(data) {
-				data.forEach((employee) => {
-					loadSchedulesOfEmployee(employee);
-				});
-				setEmployees(data);
-			},
-		});
+	const handleChangePage = (event: unknown, newPage: number) => {
+		setPage(newPage);
 	};
 
-	const loadSchedulesOfEmployee = (employee: ControlledUser) => {
-		getSchedulesOfEmployee.mutate(employee.id, {
+	const handleChangeRowsPerPage = (event: React.ChangeEvent<HTMLInputElement>) => {
+		setRowsPerPage(parseInt(event.target.value, 10));
+		setPage(0);
+	};
+
+	useEffect(() => {
+		loadEmployees();
+	}, [page, rowsPerPage]);
+
+	const loadEmployees = () => {
+		const pagination: Pagination = { page: page, perPage: rowsPerPage };
+		getAllEmployees.mutate(pagination, {
 			onSuccess(data) {
-				employee.schedules = data;
-			},
-			onError() {
-				employee.schedules = [];
+				setEmployees(data);
 			},
 		});
 	};
@@ -120,20 +136,54 @@ export const AdminUsersEmployees = () => {
 		navigate("/admin/employees/new");
 	};
 
-	const hanldeEditEmployee = (id: number) => {
+	const handleEditEmployee = (id: number) => {
 		navigate("/admin/employees/edit", { state: { employee_id: id } });
 	};
 
-	const hanldeRemoveEmployee = (id: number) => {
-		console.log(id);
+	const handleRemoveEmployee = (employee: ControlledUser) => {
+		setCurrentEmployee(employee);
+		toggleDeleteEmployee();
 	};
 
-	const hanldeShowSchedulesOfEmployee = (id: number) => {
-		console.log(id);
+	const removeEmployee = (id: number) => {
+		deactivateEmployee.mutate(id, {
+			onSuccess() {
+				loadEmployees();
+			},
+		});
+	};
+
+	const handleShowSchedulesOfEmployee = (employee: ControlledUser) => {
+		setCurrentEmployee(employee);
+		loadSchedulesOfEmployee(employee);
+		toggleSchedules();
+	};
+
+	const loadSchedulesOfEmployee = (employee: ControlledUser) => {
+		getSchedulesOfEmployee.mutate(employee.id, {
+			onSuccess(data) {
+				employee.schedules = data;
+				setCurrentEmployee(employee);
+			},
+		});
 	};
 
 	return (
 		<>
+			<SchedulesModal
+				isOpen={isOpenSchedules}
+				onClose={toggleSchedules}
+				employee={currentEmployee}
+			/>
+			<DeleteAlertDialog
+				isOpen={isOpenDeleteEmployee}
+				onClose={toggleDeleteEmployee}
+				handleClose={() => {
+					removeEmployee(currentEmployee.id);
+					toggleDeleteEmployee();
+				}}
+			/>
+
 			<Container
 				maxWidth="md"
 				sx={{
@@ -200,13 +250,13 @@ export const AdminUsersEmployees = () => {
 													{employee.present ? "Presente" : "Ausente"}
 												</StyledTableCell>
 												<StyledTableCell scope="row" align="center">
-													<IconButton onClick={() => hanldeEditEmployee(employee.id)}>
+													<IconButton onClick={() => handleEditEmployee(employee.id)}>
 														<EditIcon />
 													</IconButton>
-													<IconButton onClick={() => hanldeRemoveEmployee(employee.id)}>
+													<IconButton onClick={() => handleRemoveEmployee(employee)}>
 														<DeleteIcon />
 													</IconButton>
-													<IconButton onClick={() => hanldeShowSchedulesOfEmployee(employee.id)}>
+													<IconButton onClick={() => handleShowSchedulesOfEmployee(employee)}>
 														<AccessTimeIcon />
 													</IconButton>
 												</StyledTableCell>
@@ -230,6 +280,15 @@ export const AdminUsersEmployees = () => {
 								</TableBody>
 							</Table>
 						</TableContainer>
+						<TablePagination
+							rowsPerPageOptions={[5, 10, 25]}
+							component="div"
+							count={employees.length}
+							rowsPerPage={rowsPerPage}
+							page={page}
+							onPageChange={handleChangePage}
+							onRowsPerPageChange={handleChangeRowsPerPage}
+						/>
 					</Paper>
 
 					<ColorButton

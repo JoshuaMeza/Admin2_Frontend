@@ -3,6 +3,11 @@ export interface User {
 	password: string;
 }
 
+export interface Pagination {
+	page: number;
+	perPage: number;
+}
+
 export interface SessionUser {
 	id: number;
 	userType: string;
