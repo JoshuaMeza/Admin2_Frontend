@@ -11,6 +11,7 @@ import {
 	ControlledUsersHistory,
 	AdminUsersJobs,
 	AdminUsersEmployees,
+	AdminUsersEditEmployee,
 	AdminUsersCreateEmployee,
 } from "./pages";
 
@@ -41,8 +42,12 @@ const router = createBrowserRouter([
 			},
 			{
 				path: "/admin/employees/new",
-				element: <AdminUsersCreateEmployee />
-			}
+				element: <AdminUsersCreateEmployee />,
+			},
+			{
+				path: "/admin/employees/edit",
+				element: <AdminUsersEditEmployee />,
+			},
 		],
 	},
 ]);

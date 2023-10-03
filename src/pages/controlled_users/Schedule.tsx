@@ -76,7 +76,7 @@ export const ControlledUsersSchedule = () => {
 				<Box
 					sx={{ minWidth: "70%", bgcolor: "#F0EFEF", padding: "2.5rem 1.5rem" }}
 				>
-					<h2 style={{ marginTop: '0' }}>¡Hola de nuevo Nombre de Usuario!</h2>
+					<h2 style={{ marginTop: "0" }}>¡Hola de nuevo Nombre de Usuario!</h2>
 					<p>Tu horario es:</p>
 					<Paper sx={{ width: "100%", overflow: "hidden" }}>
 						<TableContainer sx={{ maxHeight: 440 }}>

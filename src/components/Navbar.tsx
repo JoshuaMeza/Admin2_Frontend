@@ -1,5 +1,4 @@
-import { Button, AppBar, Box, Toolbar, Typography, ButtonProps } from "@mui/material";
-import { styled } from "@mui/material/styles";
+import { Button, AppBar, Box, Toolbar, Typography } from "@mui/material";
 import { useLocation } from "react-router-dom";
 import { Link } from "react-router-dom";
 
@@ -34,7 +33,7 @@ export const Navbar = () => {
 			{ ...CLOSURE, active: false },
 		],
 		"/admin/jobs": [
-			{ ...JOBS, active: true},
+			{ ...JOBS, active: true },
 			{ ...EMPLOYEES, active: false },
 			{ ...CLOSURE, active: false },
 		],
@@ -47,15 +46,17 @@ export const Navbar = () => {
 			{ ...JOBS, active: false },
 			{ ...EMPLOYEES, active: true },
 			{ ...CLOSURE, active: false },
-		]
+		],
+		"/admin/employees/edit": [
+			{ ...JOBS, active: false },
+			{ ...EMPLOYEES, active: true },
+			{ ...CLOSURE, active: false },
+		],
 	};
 
 	return (
 		<Box sx={{ display: "flex" }}>
-			<AppBar
-				position="static"
-				style={{ backgroundColor: "#DC7A20", padding: "0.3rem 0.5rem" }}
-			>
+			<AppBar position="static" style={{ backgroundColor: "#DC7A20", padding: "0.3rem 0.5rem" }}>
 				<Toolbar variant="dense">
 					<Typography
 						variant="h4"
@@ -70,19 +71,20 @@ export const Navbar = () => {
 							<Link to={option.link} key={index}>
 								{option.active ? (
 									<Button
-									sx={{ color: "black", backgroundColor: "#CB8B2A", "&:hover": { backgroundColor: "#C7882A" } }}
-									variant= "contained"
-									>
-									{option.label}
-									</Button>
-								) : (
-									<Button
-									sx={{ color: "black", backgroundColor: "#DC7A20" }}
+										sx={{
+											color: "black",
+											backgroundColor: "#CB8B2A",
+											"&:hover": { backgroundColor: "#C7882A" },
+										}}
+										variant="contained"
 									>
 										{option.label}
 									</Button>
-								)
-								}
+								) : (
+									<Button sx={{ color: "black", backgroundColor: "#DC7A20" }}>
+										{option.label}
+									</Button>
+								)}
 							</Link>
 						))}
 					</Box>
