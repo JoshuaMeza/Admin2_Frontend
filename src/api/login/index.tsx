@@ -3,21 +3,18 @@ import { httpClient } from "../../helpers";
 import { SessionUser, User } from "../../interfaces";
 
 interface SessionUserResponse {
-	user: SessionUser;
-	status: boolean;
+  user: SessionUser;
+  status: boolean;
 }
 
 export const useInitSession = () => {
-	return useMutation({
-		mutationKey: ["Login"],
-		mutationFn: async (user: User) => {
-			const { data } = await httpClient.post<SessionUserResponse>(
-				"/login/",
-				{
-					...user,
-				}
-			);
-			return data;
-		},
-	});
+  return useMutation({
+    mutationKey: ["Login"],
+    mutationFn: async (user: User) => {
+      const { data } = await httpClient.post<SessionUserResponse>("/login/", {
+        ...user,
+      });
+      return data;
+    },
+  });
 };
