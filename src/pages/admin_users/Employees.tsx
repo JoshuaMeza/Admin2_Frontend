@@ -26,7 +26,7 @@ import { useEffect, useState } from "react";
 import { useDeactivateEmployee, useGetAllEmployees, useGetSchedulesOfEmployee } from "../../api";
 import { ControlledUser, Pagination, Schedule } from "../../interfaces";
 import { DayRemoteId } from "../../constants";
-import dayjs from "dayjs";
+//import dayjs from "dayjs";
 import { SchedulesModal } from "../../components/SchedulesModal";
 import { useToggle } from "../../hooks";
 import { DeleteAlertDialog } from "../../components/DeleteAlertDialog";
@@ -129,7 +129,7 @@ export const AdminUsersEmployees = () => {
 	};
 
 	const isToday = (schedule: Schedule) => {
-		return days[dayjs().day()] == schedule.entryDay.id;
+		//return days[dayjs().day()] == schedule.entryDay.id;
 	};
 
 	const handleNewEmployee = () => {
