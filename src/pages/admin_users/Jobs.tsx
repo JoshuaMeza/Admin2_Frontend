@@ -122,7 +122,6 @@ export const AdminUsersJobs = () => {
 	const requestJobs = () => {
 		getJobs.mutate(undefined, {
 			onSuccess: (data) => {
-				console.log(data);
 				setRows(data);
 			},
 			onError: () => {

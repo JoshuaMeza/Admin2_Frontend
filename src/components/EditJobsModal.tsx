@@ -39,8 +39,6 @@ export const EditJobsModal = ({ isOpen, onClose, job }: Props) => {
 	});
 
 	const requestUpdateJob = () => {
-		console.log(job);
-		console.log(newJob);
 		updateJob.mutate(newJob, {
 			onSuccess: () => {
 				console.log("Puesto de trabajo actualizado");
