@@ -39,6 +39,8 @@ export const EditJobsModal = ({ isOpen, onClose, job }: Props) => {
 	});
 
 	const requestUpdateJob = () => {
+		console.log(job);
+		console.log(newJob);
 		updateJob.mutate(newJob, {
 			onSuccess: () => {
 				console.log("Puesto de trabajo actualizado");
@@ -46,7 +48,6 @@ export const EditJobsModal = ({ isOpen, onClose, job }: Props) => {
 			},
 			onError: () => {
 				console.log("Error al tratar de actualizar el puesto de trabajo");
-				console.log(newJob);
 			},
 		});
 	};
@@ -78,7 +79,7 @@ export const EditJobsModal = ({ isOpen, onClose, job }: Props) => {
 										defaultValue={job.name}
 										onChange={(e) =>
 											setNewJob({
-												...newJob,
+												...job,
 												name: e.target.value,
 											})
 										}
@@ -98,7 +99,7 @@ export const EditJobsModal = ({ isOpen, onClose, job }: Props) => {
 										defaultValue={job.area}
 										onChange={(e) =>
 											setNewJob({
-												...newJob,
+												...job,
 												area: e.target.value,
 											})
 										}

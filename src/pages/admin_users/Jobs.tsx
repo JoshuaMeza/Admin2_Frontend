@@ -7,22 +7,15 @@ import TableContainer from "@mui/material/TableContainer";
 import TableHead from "@mui/material/TableHead";
 import { styled } from "@mui/material/styles";
 import TableRow from "@mui/material/TableRow";
-import {
-	Button,
-	ButtonProps,
-	Container,
-	IconButton,
-	Modal,
-	TextField,
-	Typography,
-} from "@mui/material";
+import { Button, ButtonProps, Container, IconButton } from "@mui/material";
 import DeleteIcon from "@mui/icons-material/Delete";
 import EditIcon from "@mui/icons-material/Edit";
-import { useGetJobs, useUpdateJob, useDeleteJob } from "../../api";
+import { useGetJobs, useDeleteJob } from "../../api";
 import React, { useState, useEffect } from "react";
 import { Job } from "../../interfaces";
 import { AddJobsModal } from "../../components/AddJobsModal";
 import { EditJobsModal } from "../../components/EditJobsModal";
+import { DeleteAlertDialog } from "../../components/DeleteAlertDialog";
 
 const StyledTableCell = styled(TableCell)(({ theme }) => ({
 	[`&.${tableCellClasses.head}`]: {
@@ -81,7 +74,6 @@ const columns: readonly Column[] = [
 
 export const AdminUsersJobs = () => {
 	const getJobs = useGetJobs();
-	const updateJob = useUpdateJob();
 	const deleteJob = useDeleteJob();
 	const [openAdd, setOpenAdd] = React.useState(false);
 	const [openEdit, setOpenEdit] = React.useState(false);
@@ -139,18 +131,6 @@ export const AdminUsersJobs = () => {
 		});
 	};
 
-	const requestUpdateJob = () => {
-		updateJob.mutate(job, {
-			onSuccess: () => {
-				console.log("Puesto de trabajo actualizado");
-				window.location.reload();
-			},
-			onError: () => {
-				console.log("Error al tratar de actualizar el puesto de trabajo");
-			},
-		});
-	};
-
 	const requestDeleteJob = () => {
 		deleteJob.mutate(job, {
 			onSuccess: () => {
@@ -167,6 +147,11 @@ export const AdminUsersJobs = () => {
 		<>
 			<AddJobsModal isOpen={openAdd} onClose={handleCloseAdd}></AddJobsModal>
 			<EditJobsModal isOpen={openEdit} onClose={handleCloseEdit} job={job}></EditJobsModal>
+			<DeleteAlertDialog
+				isOpen={openDelete}
+				onClose={handleCloseDelete}
+				handleClose={requestDeleteJob}
+			></DeleteAlertDialog>
 			<Container
 				maxWidth="md"
 				sx={{
@@ -226,139 +211,6 @@ export const AdminUsersJobs = () => {
 					<ColorButton style={{ marginTop: "15px", marginLeft: "86%" }} onClick={handleOpenAdd}>
 						Añadir +
 					</ColorButton>
-
-					{/* <Modal
-						open={openEdit}
-						onClose={handleCloseEdit}
-						aria-labelledby="modal-modal-title"
-						aria-describedby="modal-modal-description"
-					>
-						<Box sx={style}>
-							<Typography id="modal-modal-title" variant="h6" component="h3">
-								Editar Puesto:
-							</Typography>
-							<Table>
-								<TableBody>
-									<TableRow>
-										<TableCell>
-											<Typography>Nombre: </Typography>
-										</TableCell>
-										<TableCell>
-											<TextField
-												id="outlined-size-small"
-												size="small"
-												className="input-name"
-												color="warning"
-												defaultValue={job.name}
-												onChange={(e) =>
-													setJob({
-														...job,
-														name: e.target.value,
-													})
-												}
-											/>
-										</TableCell>
-									</TableRow>
-									<TableRow>
-										<TableCell>
-											<Typography>Área: </Typography>
-										</TableCell>
-										<TableCell>
-											<TextField
-												id="outlined-size-small"
-												size="small"
-												className="input-area"
-												color="warning"
-												defaultValue={job.area}
-												onChange={(e) =>
-													setJob({
-														...job,
-														area: e.target.value,
-													})
-												}
-											/>
-										</TableCell>
-									</TableRow>
-								</TableBody>
-							</Table>
-							<Button
-								variant="contained"
-								sx={{
-									backgroundColor: "#ABABAB",
-									color: "black",
-									"&:hover": {
-										backgroundColor: "#C7882A",
-									},
-									marginTop: "20px",
-									marginLeft: "65%",
-								}}
-								onClick={requestUpdateJob}
-							>
-								Editar Puesto
-							</Button>
-						</Box>
-					</Modal> */}
-					<Modal
-						open={openDelete}
-						onClose={handleCloseDelete}
-						aria-labelledby="modal-modal-title"
-						aria-describedby="modal-modal-description"
-					>
-						<Box sx={style}>
-							<Typography id="modal-modal-title" variant="h6" component="h3">
-								¿Desea eliminar el puesto?
-							</Typography>
-							<Table>
-								<TableBody>
-									<TableRow>
-										<TableCell>
-											<Typography>Nombre: </Typography>
-										</TableCell>
-										<TableCell>
-											<TextField
-												id="outlined-size-small"
-												size="small"
-												className="input-name"
-												color="warning"
-												defaultValue={job.name}
-												disabled
-											/>
-										</TableCell>
-									</TableRow>
-									<TableRow>
-										<TableCell>
-											<Typography>Área: </Typography>
-										</TableCell>
-										<TableCell>
-											<TextField
-												id="outlined-size-small"
-												size="small"
-												className="input-area"
-												color="warning"
-												defaultValue={job.area}
-												disabled
-											/>
-										</TableCell>
-									</TableRow>
-								</TableBody>
-							</Table>
-							<Button
-								variant="contained"
-								sx={{
-									backgroundColor: "#ABABAB",
-									color: "black",
-									"&:hover": {
-										backgroundColor: "#C7882A",
-									},
-									marginTop: "20px",
-									marginLeft: "60%",
-								}}
-								onClick={requestDeleteJob}
-							>
-								Eliminar Puesto
-							</Button>
-						</Box>
-					</Modal>
 				</Box>
 			</Container>
 		</>
