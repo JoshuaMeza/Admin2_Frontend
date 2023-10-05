@@ -19,13 +19,13 @@ import {
 	AlertColor,
 } from "@mui/material";
 
-	const ColorButton = styled(Button)<ButtonProps>(({ theme }) => ({
-		color: theme.palette.getContrastText("#CB8B2A"),
-		backgroundColor: "#CB8B2A",
-		"&:hover": {
-			backgroundColor: "#C7882A",
-		},
-	}));
+const ColorButton = styled(Button)<ButtonProps>(({ theme }) => ({
+	color: theme.palette.getContrastText("#CB8B2A"),
+	backgroundColor: "#CB8B2A",
+	"&:hover": {
+		backgroundColor: "#C7882A",
+	},
+}));
 
 interface AlertData {
 	show: boolean;

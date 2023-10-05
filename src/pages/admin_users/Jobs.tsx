@@ -7,10 +7,15 @@ import TableContainer from "@mui/material/TableContainer";
 import TableHead from "@mui/material/TableHead";
 import { styled } from "@mui/material/styles";
 import TableRow from "@mui/material/TableRow";
-import { Button, ButtonProps, Container, Icon, IconButton, Modal, TextField, Typography } from "@mui/material";
-import DeleteIcon from '@mui/icons-material/Delete';
-import EditIcon from '@mui/icons-material/Edit';
-import React, { useState } from "react";
+import { Button, ButtonProps, Container, IconButton } from "@mui/material";
+import DeleteIcon from "@mui/icons-material/Delete";
+import EditIcon from "@mui/icons-material/Edit";
+import { useGetJobs, useDeleteJob } from "../../api";
+import React, { useState, useEffect } from "react";
+import { Job } from "../../interfaces";
+import { AddJobsModal } from "../../components/AddJobsModal";
+import { EditJobsModal } from "../../components/EditJobsModal";
+import { DeleteAlertDialog } from "../../components/DeleteAlertDialog";
 
 const StyledTableCell = styled(TableCell)(({ theme }) => ({
 	[`&.${tableCellClasses.head}`]: {
@@ -34,7 +39,7 @@ const StyledTableRow = styled(TableRow)(({ theme }) => ({
 	},
 }));
 
-const ColorButton = styled(Button)<ButtonProps>(({ theme }) => ({
+const ColorButton = styled(Button)<ButtonProps>(({}) => ({
 	color: "black",
 	backgroundColor: "#CB8B2A",
 	"&:hover": {
@@ -43,30 +48,15 @@ const ColorButton = styled(Button)<ButtonProps>(({ theme }) => ({
 }));
 
 const style = {
-	position: 'absolute' as 'absolute',
-	top: '50%',
-	left: '50%',
-	transform: 'translate(-50%, -50%)',
+	position: "absolute" as "absolute",
+	top: "50%",
+	left: "50%",
+	transform: "translate(-50%, -50%)",
 	width: 450,
-	bgcolor: '#D9D9D9',
+	bgcolor: "#D9D9D9",
 	boxShadow: 24,
 	p: 2,
-  };
-
-function createData(
-	name: string,
-	area: string,
-) {
-	return { name, area };
-}
-
-const rows = [
-	createData("Químico", "Producción"),
-    createData("Seguridad", "Infraestructura"),
-    createData("Contador", "Contaduría"),
-    createData("Líder de Proyecto", "Producción"),
-    createData("Intendencia", "Infraestructura"),
-];
+};
 
 interface Column {
 	id: "job" | "department" | "operations";
@@ -79,29 +69,88 @@ interface Column {
 const columns: readonly Column[] = [
 	{ id: "job", label: "Puesto", minWidth: 200 },
 	{ id: "department", label: "Área", minWidth: 200 },
-    { id: "operations", label: "Operaciones", minWidth: 200 },
+	{ id: "operations", label: "Operaciones", minWidth: 200 },
 ];
 
 export const AdminUsersJobs = () => {
-	const [editName, setEditName] = React.useState("");
-	const [editArea, setEditArea] = React.useState("");
+	const getJobs = useGetJobs();
+	const deleteJob = useDeleteJob();
 	const [openAdd, setOpenAdd] = React.useState(false);
 	const [openEdit, setOpenEdit] = React.useState(false);
+	const [openDelete, setOpenDelete] = React.useState(false);
 	const handleOpenAdd = () => setOpenAdd(true);
-	
-	const handleOpenEdit = (name: string, area: string) => {
-		setEditName(name);
-		setEditArea(area);
+	const handleOpenEdit = (job: Job) => {
+		setJob(job);
 		setOpenEdit(true);
-	}
+	};
+	const handleOpenDelete = (job: Job) => {
+		setJob(job);
+		setOpenDelete(true);
+	};
 	const handleCloseAdd = () => setOpenAdd(false);
 	const handleCloseEdit = () => {
-		setEditName("");
-		setEditArea("");
+		var newJob: Job = {
+			id: 0,
+			name: "",
+			area: "",
+		};
+		setJob(newJob);
 		setOpenEdit(false);
-	}
+	};
+	const handleCloseDelete = () => {
+		var newJob: Job = {
+			id: 0,
+			name: "",
+			area: "",
+		};
+		setJob(newJob);
+		setOpenDelete(false);
+	};
+
+	useEffect(() => {
+		requestJobs();
+	}, []);
+
+	const [rows, setRows] = useState<Job[]>([]);
+
+	const [job, setJob] = useState<Job>({
+		id: 0,
+		name: "",
+		area: "",
+	});
+
+	const requestJobs = () => {
+		getJobs.mutate(undefined, {
+			onSuccess: (data) => {
+				setRows(data);
+			},
+			onError: () => {
+				console.log("Error al cargar puestos de trabajo");
+			},
+		});
+	};
+
+	const requestDeleteJob = () => {
+		deleteJob.mutate(job, {
+			onSuccess: () => {
+				console.log("Puesto de trabajo eliminado");
+				window.location.reload();
+			},
+			onError: () => {
+				console.log("Error al tratar de eliminar el puesto de trabajo");
+			},
+		});
+	};
+
 	return (
 		<>
+			<AddJobsModal isOpen={openAdd} onClose={handleCloseAdd}></AddJobsModal>
+			<EditJobsModal isOpen={openEdit} onClose={handleCloseEdit} job={job}></EditJobsModal>
+			<DeleteAlertDialog
+				isOpen={openDelete}
+				onClose={handleCloseDelete}
+				handleClose={requestDeleteJob}
+			></DeleteAlertDialog>
 			<Container
 				maxWidth="md"
 				sx={{
@@ -111,10 +160,8 @@ export const AdminUsersJobs = () => {
 					justifyContent: "center",
 				}}
 			>
-				<Box
-					sx={{ minWidth: "70%", bgcolor: "#F0EFEF", padding: "2.5rem 1.5rem" }}
-				>
-					<h3 style={{ marginTop: '0' }}>Tabla de puestos:</h3>
+				<Box sx={{ minWidth: "70%", bgcolor: "#F0EFEF", padding: "2.5rem 1.5rem" }}>
+					<h3 style={{ marginTop: "0" }}>Tabla de puestos:</h3>
 					<Paper sx={{ width: "100%", overflow: "hidden" }}>
 						<TableContainer sx={{ maxHeight: 450, minHeight: 300 }}>
 							<Table stickyHeader aria-label="sticky table">
@@ -134,7 +181,7 @@ export const AdminUsersJobs = () => {
 								<TableBody>
 									{rows.map((row) => (
 										<StyledTableRow
-											key={row.name}
+											key={row.id}
 											sx={{
 												"&:last-child td, &:last-child th": { border: 0 },
 												"&:nth-of-type(odd) .MuiTableCell-body": {
@@ -142,22 +189,16 @@ export const AdminUsersJobs = () => {
 												},
 											}}
 										>
-											<StyledTableCell
-												component="th"
-												scope="row"
-												align="center"
-											>
+											<StyledTableCell component="th" scope="row" align="center">
 												{row.name}
 											</StyledTableCell>
+											<StyledTableCell align="center">{row.area}</StyledTableCell>
 											<StyledTableCell align="center">
-												{row.area}
-											</StyledTableCell>
-                                            <StyledTableCell align="center">
-											<IconButton aria-label="edit" onClick={() => handleOpenEdit(row.name, row.area)}>
-													<EditIcon/>
+												<IconButton aria-label="edit" onClick={() => handleOpenEdit(row)}>
+													<EditIcon />
 												</IconButton>
-                                                <IconButton aria-label="delete">
-													<DeleteIcon/>
+												<IconButton aria-label="delete" onClick={() => handleOpenDelete(row)}>
+													<DeleteIcon />
 												</IconButton>
 											</StyledTableCell>
 										</StyledTableRow>
@@ -166,106 +207,9 @@ export const AdminUsersJobs = () => {
 							</Table>
 						</TableContainer>
 					</Paper>
-					<ColorButton style={{marginTop: "15px", marginLeft: "86%"}} onClick={handleOpenAdd}>Añadir +</ColorButton>
-					<Modal
-						open={openAdd}
-						onClose={handleCloseAdd}
-						aria-labelledby="modal-modal-title"
-						aria-describedby="modal-modal-description"
-					>
-						<Box sx={style}>
-						<Typography id="modal-modal-title" variant="h6" component="h3">
-							Nuevo Puesto:
-						</Typography>
-						<Table>
-							<TableBody>
-								<TableRow>
-									<TableCell>
-										<Typography>Nombre: </Typography>
-									</TableCell>
-									<TableCell>
-										<TextField
-											id="outlined-size-small"
-											size="small"
-											className="input-name"
-											color="warning"
-										/>
-									</TableCell>
-								</TableRow>
-								<TableRow>
-									<TableCell>
-										<Typography>Área: </Typography>
-									</TableCell>
-									<TableCell>
-										<TextField
-												id="outlined-size-small"
-												size="small"
-												className="input-area"
-												color="warning"
-										/>
-									</TableCell>
-								</TableRow>
-							</TableBody>
-						</Table>
-						<Button 
-							variant="contained" 
-							sx={{
-								backgroundColor: "#ABABAB", 
-								color:"black", 
-								"&:hover":{
-									backgroundColor: "#C7882A",
-								},
-								marginTop: "20px",
-								marginLeft: "65%"
-							}}>
-								Añadir Puesto
-							</Button>
-						</Box>
-					</Modal>
-					<Modal
-						open={openEdit}
-						onClose={handleCloseEdit}
-						aria-labelledby="modal-modal-title"
-						aria-describedby="modal-modal-description"
-					>
-						<Box sx={style}>
-							<Typography id="modal-modal-title" variant="h6" component="h3">
-								Editar Puesto:
-							</Typography>
-							<Table>
-							<TableBody>
-								<TableRow>
-									<TableCell>
-										<Typography>Nombre: </Typography>
-									</TableCell>
-									<TableCell>
-										<TextField
-											id="outlined-size-small"
-											size="small"
-											className="input-name"
-											color="warning"
-											defaultValue={editName}
-										/>
-									</TableCell>
-								</TableRow>
-								<TableRow>
-									<TableCell>
-										<Typography>Área: </Typography>
-									</TableCell>
-									<TableCell>
-									<TextField
-											id="outlined-size-small"
-											size="small"
-											className="input-area"
-											color="warning"
-											defaultValue={editArea}
-										/>
-									</TableCell>
-								</TableRow>
-							</TableBody>
-						</Table>
-						</Box>
-					</Modal>
+					<ColorButton style={{ marginTop: "15px", marginLeft: "86%" }} onClick={handleOpenAdd}>
+						Añadir +
+					</ColorButton>
 				</Box>
 			</Container>
 		</>
