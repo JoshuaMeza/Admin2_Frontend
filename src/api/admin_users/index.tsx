@@ -1,6 +1,6 @@
 import { useMutation } from "@tanstack/react-query";
 import { httpClient } from "../../helpers";
-import { Job } from "../../interfaces";
+import { Day, Job } from "../../interfaces";
 import { ControlledUser, Pagination, Schedule } from "../../interfaces";
 
 export const useGetJobs = () => {
@@ -41,7 +41,7 @@ export const useDeleteJob = () => {
 	return useMutation({
 		mutationKey: ["Jobs"],
 		mutationFn: async (job: Job) => {
-			const { data } = await httpClient.delete<Job>("/jobs/" + job.id);
+			await httpClient.delete<Job>("/jobs/" + job.id);
 		},
 	});
 };
@@ -72,11 +72,40 @@ export const useGetSchedulesOfEmployee = () => {
 	});
 };
 
+export const useCreateEmployee = () => {
+	return useMutation({
+		mutationKey: ["Employees"],
+		mutationFn: async (user: {
+			name: string;
+			email: string;
+			password: string;
+			active: boolean;
+			salary: number;
+			jobId: number;
+		}) => {
+			const { data } = await httpClient.post<ControlledUser>("/user/", {
+				...user,
+			});
+			return data;
+		},
+	});
+};
+
 export const useDeactivateEmployee = () => {
 	return useMutation({
 		mutationKey: ["Employees"],
 		mutationFn: async (employee_id: number) => {
 			const { data } = await httpClient.delete<string>(`/user/${employee_id}`);
+			return data;
+		},
+	});
+};
+
+export const useGetDays = () => {
+	return useMutation({
+		mutationKey: ["Days"],
+		mutationFn: async () => {
+			const { data } = await httpClient.get<Day[]>("/days/");
 			return data;
 		},
 	});

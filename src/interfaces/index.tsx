@@ -17,9 +17,10 @@ export interface ControlledUser {
 	id: number;
 	name: string;
 	email: string;
+	password: string;
 	salary: number;
 	jobDescription: string;
-	present: boolean;
+	active: boolean;
 	job: Job | undefined;
 	schedules: Schedule[] | undefined;
 }
