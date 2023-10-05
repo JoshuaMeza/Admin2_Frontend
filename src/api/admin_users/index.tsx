@@ -1,16 +1,16 @@
 import { useMutation } from "@tanstack/react-query";
 import { httpClient } from "../../helpers";
-import { ControlledUser, Pagination, Schedule } from "../../interfaces";
+import { ListedEmployee, PaginationData, Schedule } from "../../interfaces";
 
-interface ControlledUsersResponse {
-	controlled_users: ControlledUser[];
+interface EmployeesWrapper {
+	controlled_users: ListedEmployee[];
 }
 
 export const useGetAllEmployees = () => {
 	return useMutation({
 		mutationKey: ["Employees"],
-		mutationFn: async ({ page, perPage }: Pagination) => {
-			const { data } = await httpClient.get<ControlledUsersResponse>(
+		mutationFn: async ({ page, perPage }: PaginationData) => {
+			const { data } = await httpClient.get<EmployeesWrapper>(
 				`/user/?page=${page}&per_page=${perPage}`
 			);
 			return data.controlled_users;
@@ -33,6 +33,25 @@ export const useDeactivateEmployee = () => {
 		mutationKey: ["Employees"],
 		mutationFn: async (employee_id: number) => {
 			const { data } = await httpClient.delete<string>(`/user/${employee_id}`);
+			return data;
+		},
+	});
+};
+
+interface InoutRecord {
+	employee_id: number;
+	arriving: boolean;
+	dateTimeRecord: string;
+}
+
+export const useRegisterInout = () => {
+	return useMutation({
+		mutationKey: ["Employees"],
+		mutationFn: async ({ employee_id, arriving, dateTimeRecord }: InoutRecord) => {
+			const { data } = await httpClient.post<unknown>(`/user/user/${employee_id}/register_inout`, {
+				arriving,
+				dateTimeRecord,
+			});
 			return data;
 		},
 	});

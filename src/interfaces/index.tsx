@@ -3,7 +3,7 @@ export interface User {
 	password: string;
 }
 
-export interface Pagination {
+export interface PaginationData {
 	page: number;
 	perPage: number;
 }
@@ -18,10 +18,18 @@ export interface ControlledUser {
 	name: string;
 	email: string;
 	salary: number;
+}
+
+export interface ListedEmployee extends ControlledUser {
 	jobDescription: string;
 	present: boolean;
-	job: Job | undefined;
-	schedules: Schedule[] | undefined;
+	schedules: string[];
+	scheduleObjs: Schedule[] | undefined;
+}
+
+export interface FullEmployee extends ControlledUser {
+	job: Job;
+	active: boolean;
 }
 
 export interface Job {
@@ -41,4 +49,10 @@ export interface Schedule {
 export interface Day {
 	id: number;
 	name: string;
+}
+
+export interface AttendanceRecord {
+	dayName: string;
+	entryDatetime: string | undefined;
+	exitDatetime: string | undefined;
 }

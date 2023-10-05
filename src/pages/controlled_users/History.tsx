@@ -11,6 +11,10 @@ import {
 	styled,
 	tableCellClasses,
 } from "@mui/material";
+import { AttendanceRecord, PaginationData, SessionUser } from "../../interfaces";
+import { useEffect, useState } from "react";
+import { useGetHistoryOfControlledUser } from "../../api/controlled_users";
+import { getSession } from "../../helpers";
 
 const StyledTableCell = styled(TableCell)(({ theme }) => ({
 	[`&.${tableCellClasses.head}`]: {
@@ -40,17 +44,30 @@ interface Column {
 }
 
 export const ControlledUsersHistory = () => {
+	const [records, setRecords] = useState<AttendanceRecord[]>([]);
+	const getHistoryOfControlledUser = useGetHistoryOfControlledUser();
 	const columns: Column[] = [
 		{ id: "day", label: "Día", minWidth: 200 },
 		{ id: "entry", label: "Entrada", minWidth: 200 },
 		{ id: "departure", label: "Salida", minWidth: 200 },
 	];
 
-	const rows = [
-		{ day: "Miercoles", entry: "9:00 - 07/Sep/2023", exit: "No registrado" },
-		{ day: "Martes", entry: "9:01 - 06/Sep/2023", exit: "17:00 - 06/Sep/2023" },
-		{ day: "Lunes", entry: "9:02 - 05/Sep/2023", exit: "17:01 - 05/Sep/2023" },
-	];
+	useEffect(() => {
+		loadHistory();
+	}, []);
+
+	const loadHistory = function () {
+		const pagination: PaginationData = { page: 0, perPage: 20 };
+		const sessionUser: SessionUser = getSession();
+		getHistoryOfControlledUser.mutate(
+			{ user_id: sessionUser.id, pagination },
+			{
+				onSuccess(data) {
+					setRecords(data);
+				},
+			}
+		);
+	};
 
 	return (
 		<>
@@ -63,9 +80,7 @@ export const ControlledUsersHistory = () => {
 					justifyContent: "center",
 				}}
 			>
-				<Box
-					sx={{ minWidth: "70%", bgcolor: "#F0EFEF", padding: "2.5rem 1.5rem" }}
-				>
+				<Box sx={{ minWidth: "70%", bgcolor: "#F0EFEF", padding: "2.5rem 1.5rem" }}>
 					<h2 style={{ marginTop: "0" }}>Historial de asistencia</h2>
 					<Paper sx={{ width: "100%", overflow: "hidden" }}>
 						<TableContainer sx={{ maxHeight: 440 }}>
@@ -84,7 +99,7 @@ export const ControlledUsersHistory = () => {
 									</TableRow>
 								</TableHead>
 								<TableBody>
-									{rows.map((row, index) => (
+									{records.map((record, index) => (
 										<StyledTableRow
 											key={index}
 											sx={{
@@ -95,13 +110,13 @@ export const ControlledUsersHistory = () => {
 											}}
 										>
 											<StyledTableCell scope="row" align="center">
-												{row.day}
+												{record.dayName}
 											</StyledTableCell>
 											<StyledTableCell scope="row" align="center">
-												{row.entry}
+												{record.entryDatetime || "No registrado"}
 											</StyledTableCell>
 											<StyledTableCell scope="row" align="center">
-												{row.exit}
+												{record.exitDatetime || "No registrado"}
 											</StyledTableCell>
 										</StyledTableRow>
 									))}

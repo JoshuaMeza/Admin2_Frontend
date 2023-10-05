@@ -24,9 +24,7 @@ import {
 import { useNavigate } from "react-router-dom";
 import { useEffect, useState } from "react";
 import { useDeactivateEmployee, useGetAllEmployees, useGetSchedulesOfEmployee } from "../../api";
-import { ControlledUser, Pagination, Schedule } from "../../interfaces";
-import { DayRemoteId } from "../../constants";
-import dayjs from "dayjs";
+import { ListedEmployee, PaginationData } from "../../interfaces";
 import { SchedulesModal } from "../../components/SchedulesModal";
 import { useToggle } from "../../hooks";
 import { DeleteAlertDialog } from "../../components/DeleteAlertDialog";
@@ -71,18 +69,18 @@ export const AdminUsersEmployees = () => {
 	const getAllEmployees = useGetAllEmployees();
 	const getSchedulesOfEmployee = useGetSchedulesOfEmployee();
 	const deactivateEmployee = useDeactivateEmployee();
-	const [employees, setEmployees] = useState<ControlledUser[]>([]);
+	const [employees, setEmployees] = useState<ListedEmployee[]>([]);
 	const [isOpenDeleteEmployee, toggleDeleteEmployee] = useToggle();
 	const [isOpenSchedules, toggleSchedules] = useToggle();
-	const [currentEmployee, setCurrentEmployee] = useState<ControlledUser>({
+	const [currentEmployee, setCurrentEmployee] = useState<ListedEmployee>({
 		id: 0,
 		name: "",
 		email: "",
 		salary: 0,
 		jobDescription: "",
 		present: false,
-		schedules: undefined,
-		job: undefined,
+		schedules: [],
+		scheduleObjs: undefined,
 	});
 
 	const columns: Column[] = [
@@ -92,16 +90,6 @@ export const AdminUsersEmployees = () => {
 		{ id: "presence", label: "Presencia", minWidth: 120 },
 		{ id: "operations", label: "Operaciones", minWidth: 120 },
 	];
-
-	const days: { [key: number]: number } = {
-		0: DayRemoteId.Sunday,
-		1: DayRemoteId.Monday,
-		2: DayRemoteId.Tuesday,
-		3: DayRemoteId.Wednesday,
-		4: DayRemoteId.Thursday,
-		5: DayRemoteId.Friday,
-		6: DayRemoteId.Saturday,
-	};
 
 	const [page, setPage] = useState(0);
 	const [rowsPerPage, setRowsPerPage] = useState(5);
@@ -120,16 +108,12 @@ export const AdminUsersEmployees = () => {
 	}, [page, rowsPerPage]);
 
 	const loadEmployees = () => {
-		const pagination: Pagination = { page: page, perPage: rowsPerPage };
+		const pagination: PaginationData = { page: page, perPage: rowsPerPage };
 		getAllEmployees.mutate(pagination, {
 			onSuccess(data) {
 				setEmployees(data);
 			},
 		});
-	};
-
-	const isToday = (schedule: Schedule) => {
-		return days[dayjs().day()] == schedule.entryDay.id;
 	};
 
 	const handleNewEmployee = () => {
@@ -140,7 +124,7 @@ export const AdminUsersEmployees = () => {
 		navigate("/admin/employees/edit", { state: { employee_id: id } });
 	};
 
-	const handleRemoveEmployee = (employee: ControlledUser) => {
+	const handleRemoveEmployee = (employee: ListedEmployee) => {
 		setCurrentEmployee(employee);
 		toggleDeleteEmployee();
 	};
@@ -153,16 +137,16 @@ export const AdminUsersEmployees = () => {
 		});
 	};
 
-	const handleShowSchedulesOfEmployee = (employee: ControlledUser) => {
+	const handleShowSchedulesOfEmployee = (employee: ListedEmployee) => {
 		setCurrentEmployee(employee);
-		loadSchedulesOfEmployee(employee);
+		if (!employee.scheduleObjs) loadSchedulesOfEmployee(employee);
 		toggleSchedules();
 	};
 
-	const loadSchedulesOfEmployee = (employee: ControlledUser) => {
+	const loadSchedulesOfEmployee = (employee: ListedEmployee) => {
 		getSchedulesOfEmployee.mutate(employee.id, {
 			onSuccess(data) {
-				employee.schedules = data;
+				employee.scheduleObjs = data;
 				setCurrentEmployee(employee);
 			},
 		});
@@ -232,18 +216,11 @@ export const AdminUsersEmployees = () => {
 												</StyledTableCell>
 												<StyledTableCell scope="row" align="center">
 													<List style={{ padding: "0" }}>
-														{employee.schedules
-															?.filter((schedule) => isToday(schedule))
-															.map((schedule) => (
-																<ListItem
-																	key={schedule.id}
-																	style={{ padding: "0", textAlign: "center" }}
-																>
-																	<ListItemText
-																		primary={`${schedule.entryTime} - ${schedule.exitTime}`}
-																	/>
-																</ListItem>
-															))}
+														{employee.schedules?.map((schedule, index) => (
+															<ListItem key={index} style={{ padding: "0", textAlign: "center" }}>
+																<ListItemText primary={schedule} />
+															</ListItem>
+														))}
 													</List>
 												</StyledTableCell>
 												<StyledTableCell scope="row" align="center">
