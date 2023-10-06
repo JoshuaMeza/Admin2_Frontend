@@ -83,6 +83,19 @@ export const AdminUsersCreateEmployee = () => {
 		{ id: "deparure", label: "Salida", minWidth: 120 },
 	];
 	const [schedules, setSchedules] = useState<Schedule[]>([]);
+	const [newSchedule, setNewSchedule] = useState<Schedule>({
+		id: 0,
+		entryDay: {
+			id: 0,
+			name: "",
+		},
+		entryTime: "",
+		exitDay: {
+			id: 0,
+			name: "",
+		},
+		exitTime: "",
+	});
 	const [employee, setEmployee] = useState<{
 		name: string;
 		email: string;
@@ -130,16 +143,9 @@ export const AdminUsersCreateEmployee = () => {
 		return jobs.map((job) => ({ label: job.name }));
 	}
 
-	const handleAddSchedule = (entryD: Day, entryT: string, exitD: Day, exitT: string) => {
-		if (entryD && entryT && exitD && exitT) {
-			const newSchedule: Schedule = {
-				id: 0,
-				entryDay: entryD,
-				entryTime: entryT,
-				exitDay: exitD,
-				exitTime: exitT,
-			};
-			setSchedules([...schedules, newSchedule]);
+	const handleAddSchedule = (newS: Schedule) => {
+		if (newS) {
+			setSchedules([...schedules, newS]);
 			handleCloseAdd();
 		} else {
 			console.log("Error al agregar el nuevo horario");
@@ -167,6 +173,20 @@ export const AdminUsersCreateEmployee = () => {
 		const foundJob = jobsArray.find((jobObject) => jobObject.name === jobName);
 		if (foundJob) {
 			setEmployee({ ...employee, jobId: foundJob.id });
+		}
+	};
+
+	const setScheduleEntryDay = (entry: string | null) => {
+		const foundDay = daysArray.find((day) => day.name === entry);
+		if (foundDay) {
+			setNewSchedule({ ...newSchedule, entryDay: foundDay });
+		}
+	};
+
+	const setScheduleExitDay = (exit: string | null) => {
+		const foundDay = daysArray.find((day) => day.name === exit);
+		if (foundDay) {
+			setNewSchedule({ ...newSchedule, exitDay: foundDay });
 		}
 	};
 
@@ -351,7 +371,9 @@ export const AdminUsersCreateEmployee = () => {
 												options={days}
 												sx={{ width: "100%" }}
 												color="warning"
-												onInputChange={(event: any, newValue: string | null) => {}}
+												onInputChange={(event: any, newValue: string | null) =>
+													setScheduleEntryDay(newValue)
+												}
 												renderInput={(params) => (
 													<TextField {...params} label="Día" color="warning" />
 												)}
@@ -364,7 +386,9 @@ export const AdminUsersCreateEmployee = () => {
 												options={dayTimes}
 												sx={{ width: "100%" }}
 												color="warning"
-												onInputChange={(event: any, newValue: string | null) => {}}
+												onInputChange={(event: any, newValue: string) =>
+													setNewSchedule({ ...newSchedule, entryTime: newValue })
+												}
 												renderInput={(params) => (
 													<TextField {...params} label="Horario" color="warning" />
 												)}
@@ -382,7 +406,9 @@ export const AdminUsersCreateEmployee = () => {
 												options={days}
 												sx={{ width: "100%" }}
 												color="warning"
-												onInputChange={(event: any, newValue: string | null) => {}}
+												onInputChange={(event: any, newValue: string | null) =>
+													setScheduleExitDay(newValue)
+												}
 												renderInput={(params) => (
 													<TextField {...params} label="Día" color="warning" />
 												)}
@@ -395,7 +421,9 @@ export const AdminUsersCreateEmployee = () => {
 												options={dayTimes}
 												sx={{ width: "100%" }}
 												color="warning"
-												onInputChange={(event: any, newValue: string | null) => {}}
+												onInputChange={(event: any, newValue: string) =>
+													setNewSchedule({ ...newSchedule, exitTime: newValue })
+												}
 												renderInput={(params) => (
 													<TextField {...params} label="Horario" color="warning" />
 												)}
@@ -415,6 +443,7 @@ export const AdminUsersCreateEmployee = () => {
 									marginTop: "20px",
 									marginLeft: "65%",
 								}}
+								onClick={() => handleAddSchedule(newSchedule)}
 							>
 								Añadir Puesto
 							</Button>

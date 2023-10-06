@@ -82,7 +82,7 @@ export const useCreateEmployee = () => {
 			salary: number;
 			jobId: number;
 		}) => {
-			const { data } = await httpClient.post<ControlledUser>("/user/", {
+			const { data } = await httpClient.post<{}>("/user/", {
 				...user,
 			});
 			return data;
@@ -100,13 +100,16 @@ export const useDeactivateEmployee = () => {
 	});
 };
 
-<<<<<<< HEAD
 export const useGetDays = () => {
 	return useMutation({
 		mutationKey: ["Days"],
 		mutationFn: async () => {
 			const { data } = await httpClient.get<Day[]>("/days/");
-=======
+			return data;
+		},
+	});
+};
+
 interface InoutRecord {
 	employee_id: number;
 	arriving: boolean;
@@ -121,7 +124,6 @@ export const useRegisterInout = () => {
 				arriving,
 				dateTimeRecord,
 			});
->>>>>>> development
 			return data;
 		},
 	});
