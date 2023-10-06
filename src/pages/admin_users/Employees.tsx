@@ -1,6 +1,7 @@
 import DeleteIcon from "@mui/icons-material/Delete";
 import EditIcon from "@mui/icons-material/Edit";
 import AccessTimeIcon from "@mui/icons-material/AccessTime";
+import PendingActionsIcon from "@mui/icons-material/PendingActions";
 import {
 	Box,
 	Button,
@@ -23,11 +24,16 @@ import {
 } from "@mui/material";
 import { useNavigate } from "react-router-dom";
 import { useEffect, useState } from "react";
-import { useDeactivateEmployee, useGetAllEmployees, useGetSchedulesOfEmployee } from "../../api";
+import {
+	useDeactivateEmployee,
+	useGetAllEmployees,
+	useGetSchedulesOfEmployee,
+	useRegisterInout,
+} from "../../api";
 import { ListedEmployee, PaginationData } from "../../interfaces";
 import { SchedulesModal } from "../../components/SchedulesModal";
 import { useToggle } from "../../hooks";
-import { DeleteAlertDialog } from "../../components/DeleteAlertDialog";
+import { AddInoutModal, DeleteAlertDialog } from "../../components";
 
 const StyledTableCell = styled(TableCell)(({ theme }) => ({
 	[`&.${tableCellClasses.head}`]: {
@@ -69,9 +75,11 @@ export const AdminUsersEmployees = () => {
 	const getAllEmployees = useGetAllEmployees();
 	const getSchedulesOfEmployee = useGetSchedulesOfEmployee();
 	const deactivateEmployee = useDeactivateEmployee();
+	const registerInout = useRegisterInout();
 	const [employees, setEmployees] = useState<ListedEmployee[]>([]);
 	const [isOpenDeleteEmployee, toggleDeleteEmployee] = useToggle();
 	const [isOpenSchedules, toggleSchedules] = useToggle();
+	const [isOpenInout, toggleInout] = useToggle();
 	const [currentEmployee, setCurrentEmployee] = useState<ListedEmployee>({
 		id: 0,
 		name: "",
@@ -152,8 +160,34 @@ export const AdminUsersEmployees = () => {
 		});
 	};
 
+	const handleRegisterInout = (employee: ListedEmployee) => {
+		setCurrentEmployee(employee);
+		toggleInout();
+	};
+
+	const addInout = (dateTimeRecord: string, arriving: boolean) => {
+		registerInout.mutate(
+			{ employee_id: currentEmployee.id, arriving, dateTimeRecord },
+			{
+				onSuccess() {
+					loadEmployees();
+				},
+			}
+		);
+	};
+
 	return (
 		<>
+			<AddInoutModal
+				isOpen={isOpenInout}
+				onClose={toggleInout}
+				handleClose={(data) => {
+					if (data.time) {
+						addInout(data.time.format("YYYY-MM-DD HH:mm:ss"), data.arriving);
+						toggleInout();
+					}
+				}}
+			/>
 			<SchedulesModal
 				isOpen={isOpenSchedules}
 				onClose={toggleSchedules}
@@ -235,6 +269,9 @@ export const AdminUsersEmployees = () => {
 													</IconButton>
 													<IconButton onClick={() => handleShowSchedulesOfEmployee(employee)}>
 														<AccessTimeIcon />
+													</IconButton>
+													<IconButton onClick={() => handleRegisterInout(employee)}>
+														<PendingActionsIcon />
 													</IconButton>
 												</StyledTableCell>
 											</StyledTableRow>

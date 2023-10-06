@@ -2,10 +2,6 @@ import { useMutation } from "@tanstack/react-query";
 import { httpClient } from "../../helpers";
 import { ListedEmployee, PaginationData, Schedule, Job } from "../../interfaces";
 
-interface EmployeesWrapper {
-	controlled_users: ListedEmployee[];
-}
-
 export const useGetJobs = () => {
 	return useMutation({
 		mutationKey: ["Jobs"],
@@ -50,6 +46,10 @@ export const useDeleteJob = () => {
 	});
 };
 
+interface EmployeesWrapper {
+	controlled_users: ListedEmployee[];
+}
+
 export const useGetAllEmployees = () => {
 	return useMutation({
 		mutationKey: ["Employees"],
@@ -76,7 +76,7 @@ export const useDeactivateEmployee = () => {
 	return useMutation({
 		mutationKey: ["Employees"],
 		mutationFn: async (employee_id: number) => {
-			const { data } = await httpClient.delete<string>(`/user/${employee_id}`);
+			const { data } = await httpClient.delete<unknown>(`/user/${employee_id}`);
 			return data;
 		},
 	});
