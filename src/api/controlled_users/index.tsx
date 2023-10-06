@@ -5,9 +5,6 @@ import { AttendanceRecord, FullEmployee, PaginationData } from "../../interfaces
 export const useGetControlledUser = () => {
 	return useMutation({
 		mutationKey: ["ControlledUser"],
-<<<<<<< HEAD
-		mutationFn: async (controlledUser: ControlledUser) => {},
-=======
 		mutationFn: async (user_id: number) => {
 			const { data } = await httpClient.get<FullEmployee>(`/user/${user_id}`);
 			return data;
@@ -33,6 +30,5 @@ export const useGetHistoryOfControlledUser = () => {
 			);
 			return data.body;
 		},
->>>>>>> development
 	});
 };

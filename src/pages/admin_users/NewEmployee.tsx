@@ -445,7 +445,7 @@ export const AdminUsersCreateEmployee = () => {
 								}}
 								onClick={() => handleAddSchedule(newSchedule)}
 							>
-								Añadir Puesto
+								Añadir Horario
 							</Button>
 						</Box>
 					</Modal>
