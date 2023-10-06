@@ -1,7 +1,10 @@
 import { useMutation } from "@tanstack/react-query";
 import { httpClient } from "../../helpers";
-import { Day, Job } from "../../interfaces";
-import { ControlledUser, Pagination, Schedule } from "../../interfaces";
+import { ListedEmployee, PaginationData, Schedule, Job, Day } from "../../interfaces";
+
+interface EmployeesWrapper {
+	controlled_users: ListedEmployee[];
+}
 
 export const useGetJobs = () => {
 	return useMutation({
@@ -46,15 +49,11 @@ export const useDeleteJob = () => {
 	});
 };
 
-interface ControlledUsersResponse {
-	controlled_users: ControlledUser[];
-}
-
 export const useGetAllEmployees = () => {
 	return useMutation({
 		mutationKey: ["Employees"],
-		mutationFn: async ({ page, perPage }: Pagination) => {
-			const { data } = await httpClient.get<ControlledUsersResponse>(
+		mutationFn: async ({ page, perPage }: PaginationData) => {
+			const { data } = await httpClient.get<EmployeesWrapper>(
 				`/user/?page=${page}&per_page=${perPage}`
 			);
 			return data.controlled_users;
@@ -101,11 +100,28 @@ export const useDeactivateEmployee = () => {
 	});
 };
 
+<<<<<<< HEAD
 export const useGetDays = () => {
 	return useMutation({
 		mutationKey: ["Days"],
 		mutationFn: async () => {
 			const { data } = await httpClient.get<Day[]>("/days/");
+=======
+interface InoutRecord {
+	employee_id: number;
+	arriving: boolean;
+	dateTimeRecord: string;
+}
+
+export const useRegisterInout = () => {
+	return useMutation({
+		mutationKey: ["Employees"],
+		mutationFn: async ({ employee_id, arriving, dateTimeRecord }: InoutRecord) => {
+			const { data } = await httpClient.post<unknown>(`/user/user/${employee_id}/register_inout`, {
+				arriving,
+				dateTimeRecord,
+			});
+>>>>>>> development
 			return data;
 		},
 	});

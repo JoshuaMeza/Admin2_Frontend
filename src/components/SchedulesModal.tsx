@@ -6,11 +6,10 @@ import {
 	TableCell,
 	TableHead,
 	TableRow,
-	Typography,
 	styled,
 	tableCellClasses,
 } from "@mui/material";
-import { ControlledUser } from "../interfaces";
+import { ListedEmployee } from "../interfaces";
 
 const StyledTableCell = styled(TableCell)(({ theme }) => ({
 	[`&.${tableCellClasses.head}`]: {
@@ -37,7 +36,7 @@ const StyledTableRow = styled(TableRow)(({ theme }) => ({
 interface Props {
 	isOpen: boolean;
 	onClose: () => void;
-	employee: ControlledUser;
+	employee: ListedEmployee;
 }
 
 interface Column {
@@ -83,8 +82,8 @@ export const SchedulesModal = ({ isOpen, onClose, employee }: Props) => {
 							</TableRow>
 						</TableHead>
 						<TableBody>
-							{employee?.schedules && employee.schedules.length > 0 ? (
-								employee.schedules.map((schedule) => (
+							{employee?.scheduleObjs && employee.scheduleObjs.length > 0 ? (
+								employee.scheduleObjs.map((schedule) => (
 									<StyledTableRow
 										key={schedule.id}
 										sx={{
@@ -113,7 +112,7 @@ export const SchedulesModal = ({ isOpen, onClose, employee }: Props) => {
 									}}
 								>
 									<StyledTableCell scope="row" align="center" colSpan={2}>
-										No hay empleados para mostrar
+										No hay horarios para mostrar
 									</StyledTableCell>
 								</StyledTableRow>
 							)}
