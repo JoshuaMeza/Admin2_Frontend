@@ -1,6 +1,3 @@
-import DeleteIcon from "@mui/icons-material/Delete";
-import EditIcon from "@mui/icons-material/Edit";
-import AccessTimeIcon from "@mui/icons-material/AccessTime";
 import { dayTimes } from "../../components";
 import {
 	Autocomplete,
@@ -23,8 +20,8 @@ import {
 	tableCellClasses,
 } from "@mui/material";
 import React, { useEffect, useState } from "react";
-import { ControlledUser, Day, Job, Schedule } from "../../interfaces";
-import { useCreateEmployee, useGetDays, useGetJobs } from "../../api";
+import { Day, Job, Schedule } from "../../interfaces";
+import { useCreateEmployee, useCreateSchedule, useGetDays, useGetJobs } from "../../api";
 
 const ColorButton = styled(Button)<ButtonProps>(({ theme }) => ({
 	color: theme.palette.getContrastText("#CB8B2A"),
@@ -65,6 +62,7 @@ export const AdminUsersCreateEmployee = () => {
 	const getDays = useGetDays();
 	const getJobs = useGetJobs();
 	const createEmployee = useCreateEmployee();
+	const createSchedule = useCreateSchedule();
 	const [openAdd, setOpenAdd] = React.useState(false);
 	const handleOpenAdd = () => setOpenAdd(true);
 	const handleCloseAdd = () => setOpenAdd(false);
@@ -163,6 +161,38 @@ export const AdminUsersCreateEmployee = () => {
 			},
 		});
 	};
+
+	interface ScheduleCreationStructure {
+		entryDayId: number;
+		entryTime: string;
+		exitDayId: number;
+		exitTime: string;
+		controlledUserId: number;
+	}
+
+	const requestCreateSchedule = (s: ScheduleCreationStructure) => {
+		createSchedule.mutate(s, {
+			onSuccess: (data) => {
+				console.log("Horario Creado con éxito");
+				console.log(data);
+			},
+			onError: () => {
+				console.log("Error al crear el Horario");
+			},
+		});
+	};
+
+	function transformSchedule(s: Schedule, userId: number): ScheduleCreationStructure {
+		var result: ScheduleCreationStructure;
+		result = {
+			entryDayId: s.entryDay.id,
+			entryTime: s.entryTime,
+			exitDayId: s.exitDay.id,
+			exitTime: s.exitTime,
+			controlledUserId: userId,
+		};
+		return result;
+	}
 
 	const setEmployeeSalary = (salary: string) => {
 		const salaryNum = Number(salary);

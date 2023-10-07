@@ -71,19 +71,21 @@ export const useGetSchedulesOfEmployee = () => {
 	});
 };
 
+interface NewEmployee {
+	name: string;
+	email: string;
+	password: string;
+	active: boolean;
+	salary: number;
+	jobId: number;
+}
+
 export const useCreateEmployee = () => {
 	return useMutation({
 		mutationKey: ["Employees"],
-		mutationFn: async (user: {
-			name: string;
-			email: string;
-			password: string;
-			active: boolean;
-			salary: number;
-			jobId: number;
-		}) => {
+		mutationFn: async (employee: NewEmployee) => {
 			const { data } = await httpClient.post<{}>("/user/", {
-				...user,
+				...employee,
 			});
 			return data;
 		},
@@ -95,6 +97,26 @@ export const useDeactivateEmployee = () => {
 		mutationKey: ["Employees"],
 		mutationFn: async (employee_id: number) => {
 			const { data } = await httpClient.delete<string>(`/user/${employee_id}`);
+			return data;
+		},
+	});
+};
+
+interface NewSchedule {
+	entryDayId: number;
+	entryTime: string;
+	exitDayId: number;
+	exitTime: string;
+	controlledUserId: number;
+}
+
+export const useCreateSchedule = () => {
+	return useMutation({
+		mutationKey: ["Schedules"],
+		mutationFn: async (schedule: NewSchedule) => {
+			const { data } = await httpClient.post<{}>("/schedules", {
+				...schedule,
+			});
 			return data;
 		},
 	});
