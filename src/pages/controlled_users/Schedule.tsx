@@ -8,6 +8,10 @@ import TableHead from "@mui/material/TableHead";
 import { styled } from "@mui/material/styles";
 import TableRow from "@mui/material/TableRow";
 import { Container } from "@mui/material";
+import { useGetControlledUser, useGetSchedulesOfEmployee } from "../../api";
+import { Schedule, SessionUser } from "../../interfaces";
+import { useEffect, useState } from "react";
+import { getSession } from "../../helpers";
 
 const StyledTableCell = styled(TableCell)(({ theme }) => ({
 	[`&.${tableCellClasses.head}`]: {
@@ -31,25 +35,8 @@ const StyledTableRow = styled(TableRow)(({ theme }) => ({
 	},
 }));
 
-function createData(
-	entryD: string,
-	entryH: string,
-	departureD: string,
-	departureH: string
-) {
-	return { entryD, entryH, departureD, departureH };
-}
-
-const rows = [
-	createData("Lunes", "9:00", "Lunes", "17:00"),
-	createData("Martes", "9:00", "Martes", "17:00"),
-	createData("Miercoles", "9:00", "Miercoles", "17:00"),
-	createData("Jueves", "9:00", "Jueves", "17:00"),
-	createData("Viernes", "9:00", "Viernes", "17:00"),
-];
-
 interface Column {
-	id: "entry" | "departure";
+	id: "entry" | "exit";
 	label: string;
 	minWidth?: number;
 	align?: "center";
@@ -58,10 +45,53 @@ interface Column {
 
 const columns: readonly Column[] = [
 	{ id: "entry", label: "Entrada", minWidth: 300 },
-	{ id: "departure", label: "Salida", minWidth: 300 },
+	{ id: "exit", label: "Salida", minWidth: 300 },
 ];
 
+function getFirstName(fullName: string) {
+	const words = fullName.split(" ");
+	if (words.length > 0) {
+		return words[0];
+	} else {
+		return "";
+	}
+}
+
 export const ControlledUsersSchedule = () => {
+	const getSchedules = useGetSchedulesOfEmployee();
+	const getUser = useGetControlledUser();
+	const [rows, setRows] = useState<Schedule[]>([]);
+	const [name, setName] = useState<string>("");
+
+	useEffect(() => {
+		requestSchedules();
+		requestUserInfo();
+	}, []);
+
+	const requestUserInfo = () => {
+		const sessionUser: SessionUser = getSession();
+		getUser.mutate(sessionUser.id, {
+			onSuccess: (data) => {
+				const firstName = getFirstName(data.name);
+				setName(firstName);
+			},
+			onError: () => {
+				console.log("Error al cargar datos del usuario");
+			},
+		});
+	};
+
+	const requestSchedules = () => {
+		const sessionUser: SessionUser = getSession();
+		getSchedules.mutate(sessionUser.id, {
+			onSuccess: (data) => {
+				setRows(data);
+			},
+			onError: () => {
+				console.log("Error al cargar los horarios");
+			},
+		});
+	};
 	return (
 		<>
 			<Container
@@ -73,10 +103,8 @@ export const ControlledUsersSchedule = () => {
 					justifyContent: "center",
 				}}
 			>
-				<Box
-					sx={{ minWidth: "70%", bgcolor: "#F0EFEF", padding: "2.5rem 1.5rem" }}
-				>
-					<h2 style={{ marginTop: "0" }}>¡Hola de nuevo Nombre de Usuario!</h2>
+				<Box sx={{ minWidth: "70%", bgcolor: "#F0EFEF", padding: "2.5rem 1.5rem" }}>
+					<h2 style={{ marginTop: "0" }}>¡Hola de nuevo {name}!</h2>
 					<p>Tu horario es:</p>
 					<Paper sx={{ width: "100%", overflow: "hidden" }}>
 						<TableContainer sx={{ maxHeight: 440 }}>
@@ -95,9 +123,28 @@ export const ControlledUsersSchedule = () => {
 									</TableRow>
 								</TableHead>
 								<TableBody>
-									{rows.map((row) => (
+									{rows && rows.length > 0 ? (
+										rows.map((row) => (
+											<StyledTableRow
+												key={row.entryDay.name}
+												sx={{
+													"&:last-child td, &:last-child th": { border: 0 },
+													"&:nth-of-type(odd) .MuiTableCell-body": {
+														color: "#CB8B2A",
+													},
+												}}
+											>
+												<StyledTableCell component="th" scope="row" align="center">
+													{row.entryDay.name} {row.entryTime}
+												</StyledTableCell>
+												<StyledTableCell align="center">
+													{row.exitDay.name} {row.exitTime}
+												</StyledTableCell>
+											</StyledTableRow>
+										))
+									) : (
 										<StyledTableRow
-											key={row.entryD}
+											key={0}
 											sx={{
 												"&:last-child td, &:last-child th": { border: 0 },
 												"&:nth-of-type(odd) .MuiTableCell-body": {
@@ -105,18 +152,11 @@ export const ControlledUsersSchedule = () => {
 												},
 											}}
 										>
-											<StyledTableCell
-												component="th"
-												scope="row"
-												align="center"
-											>
-												{row.entryD} {row.entryH}
-											</StyledTableCell>
-											<StyledTableCell align="center">
-												{row.departureD} {row.departureH}
+											<StyledTableCell scope="row" align="center" colSpan={5}>
+												No hay horarios asignados
 											</StyledTableCell>
 										</StyledTableRow>
-									))}
+									)}
 								</TableBody>
 							</Table>
 						</TableContainer>
