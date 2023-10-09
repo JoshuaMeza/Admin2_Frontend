@@ -179,9 +179,34 @@ export const AdminUsersJobs = () => {
 									</TableRow>
 								</TableHead>
 								<TableBody>
-									{rows.map((row) => (
+									{rows && rows.length > 0 ? (
+										rows.map((row) => (
+											<StyledTableRow
+												key={row.id}
+												sx={{
+													"&:last-child td, &:last-child th": { border: 0 },
+													"&:nth-of-type(odd) .MuiTableCell-body": {
+														color: "#CB8B2A",
+													},
+												}}
+											>
+												<StyledTableCell component="th" scope="row" align="center">
+													{row.name}
+												</StyledTableCell>
+												<StyledTableCell align="center">{row.area}</StyledTableCell>
+												<StyledTableCell align="center">
+													<IconButton aria-label="edit" onClick={() => handleOpenEdit(row)}>
+														<EditIcon />
+													</IconButton>
+													<IconButton aria-label="delete" onClick={() => handleOpenDelete(row)}>
+														<DeleteIcon />
+													</IconButton>
+												</StyledTableCell>
+											</StyledTableRow>
+										))
+									) : (
 										<StyledTableRow
-											key={row.id}
+											key={0}
 											sx={{
 												"&:last-child td, &:last-child th": { border: 0 },
 												"&:nth-of-type(odd) .MuiTableCell-body": {
@@ -189,20 +214,11 @@ export const AdminUsersJobs = () => {
 												},
 											}}
 										>
-											<StyledTableCell component="th" scope="row" align="center">
-												{row.name}
-											</StyledTableCell>
-											<StyledTableCell align="center">{row.area}</StyledTableCell>
-											<StyledTableCell align="center">
-												<IconButton aria-label="edit" onClick={() => handleOpenEdit(row)}>
-													<EditIcon />
-												</IconButton>
-												<IconButton aria-label="delete" onClick={() => handleOpenDelete(row)}>
-													<DeleteIcon />
-												</IconButton>
+											<StyledTableCell scope="row" align="center" colSpan={5}>
+												No hay puestos de trabajo para mostrar
 											</StyledTableCell>
 										</StyledTableRow>
-									))}
+									)}
 								</TableBody>
 							</Table>
 						</TableContainer>

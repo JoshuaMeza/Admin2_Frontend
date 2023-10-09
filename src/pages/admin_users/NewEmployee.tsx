@@ -63,6 +63,7 @@ export const AdminUsersCreateEmployee = () => {
 	const getJobs = useGetJobs();
 	const createEmployee = useCreateEmployee();
 	const createSchedule = useCreateSchedule();
+	var userId = 0;
 	const [openAdd, setOpenAdd] = React.useState(false);
 	const handleOpenAdd = () => setOpenAdd(true);
 	const handleCloseAdd = () => setOpenAdd(false);
@@ -154,11 +155,20 @@ export const AdminUsersCreateEmployee = () => {
 		createEmployee.mutate(employee, {
 			onSuccess: (data) => {
 				console.log("Empleado creado con éxito");
-				console.log(data);
+				userId = data;
+				console.log("UserId: ", data, "reality:", userId);
+				sendSchedulesForCreation(data, schedules);
 			},
 			onError: () => {
 				console.log("Error al crear el empleado");
 			},
+		});
+	};
+
+	const sendSchedulesForCreation = (id: number, list: Schedule[]) => {
+		list.forEach((schedule) => {
+			const scheduleCreation = transformSchedule(schedule, id);
+			requestCreateSchedule(scheduleCreation);
 		});
 	};
 
@@ -186,9 +196,9 @@ export const AdminUsersCreateEmployee = () => {
 		var result: ScheduleCreationStructure;
 		result = {
 			entryDayId: s.entryDay.id,
-			entryTime: s.entryTime,
+			entryTime: s.entryTime + ":00",
 			exitDayId: s.exitDay.id,
-			exitTime: s.exitTime,
+			exitTime: s.exitTime + ":00",
 			controlledUserId: userId,
 		};
 		return result;

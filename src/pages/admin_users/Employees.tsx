@@ -76,6 +76,7 @@ export const AdminUsersEmployees = () => {
 		id: 0,
 		name: "",
 		email: "",
+		password: "",
 		salary: 0,
 		jobDescription: "",
 		present: false,

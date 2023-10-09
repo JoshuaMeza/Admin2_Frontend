@@ -1,6 +1,13 @@
 import { useMutation } from "@tanstack/react-query";
 import { httpClient } from "../../helpers";
-import { ListedEmployee, PaginationData, Schedule, Job, Day } from "../../interfaces";
+import {
+	ListedEmployee,
+	PaginationData,
+	Schedule,
+	Job,
+	Day,
+	ControlledUser,
+} from "../../interfaces";
 
 interface EmployeesWrapper {
 	controlled_users: ListedEmployee[];
@@ -84,10 +91,10 @@ export const useCreateEmployee = () => {
 	return useMutation({
 		mutationKey: ["Employees"],
 		mutationFn: async (employee: NewEmployee) => {
-			const { data } = await httpClient.post<{}>("/user/", {
+			const { data } = await httpClient.post<any>("/user/", {
 				...employee,
 			});
-			return data;
+			return data.body.id;
 		},
 	});
 };
@@ -114,7 +121,7 @@ export const useCreateSchedule = () => {
 	return useMutation({
 		mutationKey: ["Schedules"],
 		mutationFn: async (schedule: NewSchedule) => {
-			const { data } = await httpClient.post<{}>("/schedules", {
+			const { data } = await httpClient.post<{}>("/schedules/", {
 				...schedule,
 			});
 			return data;
