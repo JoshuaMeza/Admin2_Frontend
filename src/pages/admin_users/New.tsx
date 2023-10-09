@@ -257,137 +257,137 @@ export const AdminUsersCreateEmployee = () => {
 						minWidth: "70%",
 						bgcolor: "#F0EFEF",
 						padding: "1rem 2rem",
-						minHeight: "70vh",
+						minHeight: "65vh",
 					}}
 				>
 					<h3 style={{ marginTop: "0", fontSize: 24 }}>Nuevo Empleado</h3>
-					<div style={{ display: "table-row-group" }}>
-						<div style={{ display: "table-cell", width: "50%" }}>
-							<FormControl variant="standard" sx={{ width: "95%" }}>
-								<InputLabel htmlFor="standard-adornment-correo" color="warning">
-									Nombre Completo
-								</InputLabel>
-								<Input
-									id="standard-adornment-amount"
-									color="warning"
-									onChange={(e) => setEmployee({ ...employee, name: e.target.value })}
-								/>
-							</FormControl>
-							<FormControl variant="standard" sx={{ width: "95%", marginTop: "7%" }}>
-								<InputLabel htmlFor="standard-adornment-correo" color="warning">
-									Correo electrónico
-								</InputLabel>
-								<Input
-									id="standard-adornment-amount"
-									color="warning"
-									onChange={(e) => setEmployee({ ...employee, email: e.target.value })}
-								/>
-							</FormControl>
-							<FormControl variant="standard" sx={{ width: "95%", marginTop: "7%" }}>
-								<InputLabel htmlFor="standard-adornment-correo" color="warning">
-									Contraseña
-								</InputLabel>
-								<Input
-									id="standard-adornment-amount"
-									color="warning"
-									onChange={(e) => setEmployee({ ...employee, password: e.target.value })}
-								/>
-							</FormControl>
-							<Autocomplete
-								disablePortal
-								id="combo-box-demo"
-								options={jobs}
-								sx={{ width: "95%", marginTop: "	%" }}
-								color="warning"
-								onInputChange={(event: any, newValue: string | null) => setEmployeeJob(newValue)}
-								renderInput={(params) => (
-									<TextField {...params} label="Puesto de Trabajo" color="warning" />
-								)}
-							/>
-							<FormControl variant="standard" sx={{ width: "95%", marginTop: "5%" }}>
-								<InputLabel htmlFor="standard-adornment-correo" color="warning">
-									Salario
-								</InputLabel>
-								<Input
-									id="standard-adornment-amount"
-									color="warning"
-									onChange={(e) => setEmployeeSalary(e.target.value)}
-								/>
-							</FormControl>
-						</div>
-						<div style={{ display: "table-cell" }}>
-							<h4>Horarios</h4>
-							<Table>
-								<TableHead>
-									<TableRow>
-										{columns.map((column) => (
-											<StyledTableCell key={column.id} align="center" style={{}}>
-												{column.label}
-											</StyledTableCell>
-										))}
-									</TableRow>
-								</TableHead>
-								<TableBody>
-									{schedules && schedules.length > 0 ? (
-										schedules.map((row) => (
-											<StyledTableRow
-												key={row.entryDay.name}
-												sx={{
-													"&:last-child td, &:last-child th": { border: 0 },
-													"&:nth-of-type(odd) .MuiTableCell-body": {
-														color: "#CB8B2A",
-													},
-												}}
-											>
-												<StyledTableCell component="th" scope="row" align="center">
-													{row.entryDay.name} {row.entryTime}
-												</StyledTableCell>
-												<StyledTableCell component="th" scope="row" align="center">
-													{row.exitDay.name} {row.exitTime}
-												</StyledTableCell>
-											</StyledTableRow>
-										))
-									) : (
-										<StyledTableRow
-											key={0}
-											sx={{
-												"&:last-child td, &:last-child th": { border: 0 },
-												"&:nth-of-type(odd) .MuiTableCell-body": {
-													color: "#CB8B2A",
-												},
-											}}
-										>
-											<StyledTableCell scope="row" align="center" colSpan={5}>
-												No hay horarios agregados
-											</StyledTableCell>
-										</StyledTableRow>
-									)}
-								</TableBody>
-							</Table>
-							<Button
-								variant="contained"
-								sx={{
-									backgroundColor: "#ABABAB",
-									color: "black",
-									"&:hover": {
-										backgroundColor: "#C7882A",
-									},
-									marginTop: "15px",
-									marginLeft: "55%",
-								}}
-								onClick={handleOpenAdd}
-							>
-								Añadir Horario+
-							</Button>
-						</div>
-					</div>
-					<ColorButton
-						variant="contained"
-						style={{ marginTop: "5%" }}
-						onClick={requestCreateEmployee}
-					>
-						Crear Empleado
-					</ColorButton>
+					<Table>
+						<TableBody>
+							<TableCell sx={{ height: "100%" }}>
+								<div>
+									<FormControl variant="standard" sx={{ width: "100%" }}>
+										<InputLabel htmlFor="standard-adornment-correo" color="warning">
+											Nombre Completo
+										</InputLabel>
+										<Input
+											id="standard-adornment-amount"
+											color="warning"
+											onChange={(e) => setEmployee({ ...employee, name: e.target.value })}
+										/>
+									</FormControl>
+								</div>
+								<div>
+									<FormControl variant="standard" sx={{ width: "100%", marginTop: "7%" }}>
+										<InputLabel htmlFor="standard-adornment-correo" color="warning">
+											Correo electrónico
+										</InputLabel>
+										<Input
+											id="standard-adornment-amount"
+											color="warning"
+											onChange={(e) => setEmployee({ ...employee, email: e.target.value })}
+										/>
+									</FormControl>
+								</div>
+								<div>
+									<FormControl variant="standard" sx={{ width: "100%", marginTop: "7%" }}>
+										<InputLabel htmlFor="standard-adornment-correo" color="warning">
+											Contraseña
+										</InputLabel>
+										<Input
+											id="standard-adornment-amount"
+											color="warning"
+											onChange={(e) => setEmployee({ ...employee, password: e.target.value })}
+										/>
+									</FormControl>
+								</div>
+								<div>
+									<Autocomplete
+										disablePortal
+										id="combo-box-demo"
+										options={jobs}
+										sx={{ width: "100%", marginTop: "10%" }}
+										color="warning"
+										onInputChange={(event: any, newValue: string | null) =>
+											setEmployeeJob(newValue)
+										}
+										renderInput={(params) => (
+											<TextField {...params} label="Puesto de Trabajo" color="warning" />
+										)}
+									/>
+								</div>
+								<div>
+									<FormControl variant="standard" sx={{ width: "100%", marginTop: "5%" }}>
+										<InputLabel htmlFor="standard-adornment-correo" color="warning">
+											Salario
+										</InputLabel>
+										<Input
+											id="standard-adornment-amount"
+											color="warning"
+											onChange={(e) => setEmployeeSalary(e.target.value)}
+										/>
+									</FormControl>
+								</div>
+								<div style={{ marginTop: "5%" }} onClick={requestCreateEmployee}>
+									<ColorButton variant="contained">Crear Empleado</ColorButton>
+								</div>
+							</TableCell>
+							<TableCell>
+								<div style={{ display: "flow" }}>
+									<h4>Horarios</h4>
+								</div>
+								<div>
+									<Table sx={{ height: "95%" }}>
+										<TableHead>
+											<TableRow>
+												{columns.map((column) => (
+													<StyledTableCell key={column.id} align="center" style={{}}>
+														{column.label}
+													</StyledTableCell>
+												))}
+											</TableRow>
+										</TableHead>
+										<TableBody>
+											{schedules.map((row) => (
+												<StyledTableRow
+													key={row.entryDay.name}
+													sx={{
+														"&:last-child td, &:last-child th": { border: 0 },
+														"&:nth-of-type(odd) .MuiTableCell-body": {
+															color: "#CB8B2A",
+														},
+													}}
+												>
+													<StyledTableCell component="th" scope="row" align="center">
+														{row.entryDay.name} {row.entryTime}
+													</StyledTableCell>
+													<StyledTableCell component="th" scope="row" align="center">
+														{row.exitDay.name} {row.exitTime}
+													</StyledTableCell>
+												</StyledTableRow>
+											))}
+										</TableBody>
+									</Table>
+								</div>
+								<div>
+									<Button
+										variant="contained"
+										sx={{
+											backgroundColor: "#ABABAB",
+											color: "black",
+											"&:hover": {
+												backgroundColor: "#C7882A",
+											},
+											marginTop: "15px",
+											marginLeft: "51%",
+										}}
+										onClick={handleOpenAdd}
+									>
+										Añadir Horario+
+									</Button>
+								</div>
+							</TableCell>
+						</TableBody>
+					</Table>
 					<Modal
 						open={openAdd}
 						onClose={handleCloseAdd}
