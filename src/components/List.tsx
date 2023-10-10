@@ -1,13 +1,3 @@
-export const days = [
-	{ label: "Lunes" },
-	{ label: "Martes" },
-	{ label: "Miércoles" },
-	{ label: "Jueves" },
-	{ label: "Viernes" },
-	{ label: "Sábado" },
-	{ label: "Domingo" },
-];
-
 export const dayTimes = [
 	{ label: "00:00" },
 	{ label: "00:15" },

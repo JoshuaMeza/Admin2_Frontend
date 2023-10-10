@@ -19,6 +19,7 @@ import {
 	styled,
 	tableCellClasses,
 } from "@mui/material";
+import { useNavigate } from "react-router-dom";
 import React, { useEffect, useState } from "react";
 import { Day, Job } from "../../interfaces";
 import { useCreateEmployee, useGetDays, useGetJobs } from "../../api";
@@ -62,6 +63,7 @@ export const AdminUsersCreateEmployee = () => {
 	const getDays = useGetDays();
 	const getJobs = useGetJobs();
 	const createEmployee = useCreateEmployee();
+	const navigate = useNavigate();
 	const [openAdd, setOpenAdd] = React.useState(false);
 	const handleOpenAdd = () => setOpenAdd(true);
 	const handleCloseAdd = () => setOpenAdd(false);
@@ -153,11 +155,10 @@ export const AdminUsersCreateEmployee = () => {
 	};
 
 	const requestCreateEmployee = () => {
-		console.log(employee);
 		createEmployee.mutate(employee, {
 			onSuccess: (data) => {
 				console.log("Empleado creado con éxito");
-				console.log(data);
+				navigate("/admin/employees");
 			},
 			onError: () => {
 				console.log("Error al crear el empleado");
@@ -267,7 +268,7 @@ export const AdminUsersCreateEmployee = () => {
 								disablePortal
 								id="combo-box-demo"
 								options={jobLabels}
-								sx={{ width: "95%", marginTop: "	%" }}
+								sx={{ width: "95%", marginTop: "10%" }}
 								color="warning"
 								onInputChange={(event: any, newValue: string | null) => setEmployeeJob(newValue)}
 								renderInput={(params) => (

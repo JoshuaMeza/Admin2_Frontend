@@ -7,6 +7,7 @@ export const useGetControlledUser = () => {
 		mutationKey: ["ControlledUser"],
 		mutationFn: async (user_id: number) => {
 			const { data } = await httpClient.get<FullEmployee>(`/user/${user_id}`);
+			console.log(data);
 			return data;
 		},
 	});
