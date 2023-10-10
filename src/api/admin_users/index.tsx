@@ -1,6 +1,13 @@
 import { useMutation } from "@tanstack/react-query";
 import { httpClient } from "../../helpers";
-import { ListedEmployee, PaginationData, Schedule, Job } from "../../interfaces";
+import {
+	ListedEmployee,
+	PaginationData,
+	Schedule,
+	Job,
+	Day,
+	ControlledUser,
+} from "../../interfaces";
 
 export const useGetJobs = () => {
 	return useMutation({
@@ -40,8 +47,7 @@ export const useDeleteJob = () => {
 	return useMutation({
 		mutationKey: ["Jobs"],
 		mutationFn: async (job: Job) => {
-			const { data } = await httpClient.delete<Job>("/jobs/" + job.id);
-			return data;
+			await httpClient.delete<Job>("/jobs/" + job.id);
 		},
 	});
 };
@@ -72,11 +78,62 @@ export const useGetSchedulesOfEmployee = () => {
 	});
 };
 
+interface NewEmployee {
+	name: string;
+	email: string;
+	password: string;
+	active: boolean;
+	salary: number;
+	jobId: number;
+}
+
+export const useCreateEmployee = () => {
+	return useMutation({
+		mutationKey: ["Employees"],
+		mutationFn: async (employee: NewEmployee) => {
+			const { data } = await httpClient.post<any>("/user/", {
+				...employee,
+			});
+			return data.body.id;
+		},
+	});
+};
+
 export const useDeactivateEmployee = () => {
 	return useMutation({
 		mutationKey: ["Employees"],
 		mutationFn: async (employee_id: number) => {
 			const { data } = await httpClient.delete<unknown>(`/user/${employee_id}`);
+			return data;
+		},
+	});
+};
+
+interface NewSchedule {
+	entryDayId: number;
+	entryTime: string;
+	exitDayId: number;
+	exitTime: string;
+	controlledUserId: number;
+}
+
+export const useCreateSchedule = () => {
+	return useMutation({
+		mutationKey: ["Schedules"],
+		mutationFn: async (schedule: NewSchedule) => {
+			const { data } = await httpClient.post<{}>("/schedules/", {
+				...schedule,
+			});
+			return data;
+		},
+	});
+};
+
+export const useGetDays = () => {
+	return useMutation({
+		mutationKey: ["Days"],
+		mutationFn: async () => {
+			const { data } = await httpClient.get<Day[]>("/days/");
 			return data;
 		},
 	});

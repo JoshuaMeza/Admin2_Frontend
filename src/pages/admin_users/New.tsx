@@ -20,8 +20,8 @@ import {
 	tableCellClasses,
 } from "@mui/material";
 import React, { useEffect, useState } from "react";
-import { Day, Job } from "../../interfaces";
-import { useCreateEmployee, useGetDays, useGetJobs } from "../../api";
+import { Day, Job, Schedule } from "../../interfaces";
+import { useCreateEmployee, useCreateSchedule, useGetDays, useGetJobs } from "../../api";
 
 const ColorButton = styled(Button)<ButtonProps>(({ theme }) => ({
 	color: theme.palette.getContrastText("#CB8B2A"),
@@ -62,6 +62,8 @@ export const AdminUsersCreateEmployee = () => {
 	const getDays = useGetDays();
 	const getJobs = useGetJobs();
 	const createEmployee = useCreateEmployee();
+	const createSchedule = useCreateSchedule();
+	var userId = 0;
 	const [openAdd, setOpenAdd] = React.useState(false);
 	const handleOpenAdd = () => setOpenAdd(true);
 	const handleCloseAdd = () => setOpenAdd(false);
@@ -71,19 +73,26 @@ export const AdminUsersCreateEmployee = () => {
 		requestJobs();
 	}, []);
 
-	const [dayLabels, setDayLabels] = useState<{ label: string }[]>([]);
+	const [days, setDays] = useState<{ label: string }[]>([]);
 	const [daysArray, setDaysArray] = useState<Day[]>([]);
-	const [jobLabels, setJobLabels] = useState<{ label: string }[]>([]);
+	const [jobs, setJobs] = useState<{ label: string }[]>([]);
 	const [jobsArray, setJobsArray] = useState<Job[]>([]);
 	const columns: Column[] = [
 		{ id: "entry", label: "Entrada", minWidth: 120 },
 		{ id: "deparure", label: "Salida", minWidth: 120 },
 	];
-	const [schedules, setSchedules] = useState<ScheduleCreationStructure[]>([]);
-	const [newSchedule, setNewSchedule] = useState<ScheduleCreationStructure>({
-		entryDayId: 0,
+	const [schedules, setSchedules] = useState<Schedule[]>([]);
+	const [newSchedule, setNewSchedule] = useState<Schedule>({
+		id: 0,
+		entryDay: {
+			id: 0,
+			name: "",
+		},
 		entryTime: "",
-		exitDayId: 0,
+		exitDay: {
+			id: 0,
+			name: "",
+		},
 		exitTime: "",
 	});
 	const [employee, setEmployee] = useState<{
@@ -93,7 +102,6 @@ export const AdminUsersCreateEmployee = () => {
 		active: boolean;
 		salary: number;
 		jobId: number;
-		schedules: ScheduleCreationStructure[];
 	}>({
 		name: "",
 		email: "",
@@ -101,30 +109,14 @@ export const AdminUsersCreateEmployee = () => {
 		salary: 0,
 		active: true,
 		jobId: 0,
-		schedules: [],
 	});
-
-	interface ScheduleCreationStructure {
-		entryDayId: number;
-		entryTime: string;
-		exitDayId: number;
-		exitTime: string;
-	}
-
-	function transformDaysArray(days: Day[]): { label: string }[] {
-		return days.map((day) => ({ label: day.name }));
-	}
-
-	function transformJobsArray(jobs: Job[]): { label: string }[] {
-		return jobs.map((job) => ({ label: job.name }));
-	}
 
 	const requestDays = () => {
 		getDays.mutate(undefined, {
 			onSuccess: (data) => {
 				setDaysArray(data);
 				var transformedDays = transformDaysArray(data);
-				setDayLabels(transformedDays);
+				setDays(transformedDays);
 			},
 			onError: () => {
 				console.log("Error al cargar los días");
@@ -137,15 +129,22 @@ export const AdminUsersCreateEmployee = () => {
 			onSuccess: (data) => {
 				setJobsArray(data);
 				var transformedJobs = transformJobsArray(data);
-				setJobLabels(transformedJobs);
+				setJobs(transformedJobs);
 			},
 		});
 	};
 
-	const handleAddSchedule = (newS: ScheduleCreationStructure) => {
+	function transformDaysArray(days: Day[]): { label: string }[] {
+		return days.map((day) => ({ label: day.name }));
+	}
+
+	function transformJobsArray(jobs: Job[]): { label: string }[] {
+		return jobs.map((job) => ({ label: job.name }));
+	}
+
+	const handleAddSchedule = (newS: Schedule) => {
 		if (newS) {
 			setSchedules([...schedules, newS]);
-			employee.schedules.push(newS);
 			handleCloseAdd();
 		} else {
 			console.log("Error al agregar el nuevo horario");
@@ -153,17 +152,57 @@ export const AdminUsersCreateEmployee = () => {
 	};
 
 	const requestCreateEmployee = () => {
-		console.log(employee);
 		createEmployee.mutate(employee, {
 			onSuccess: (data) => {
 				console.log("Empleado creado con éxito");
-				console.log(data);
+				userId = data;
+				console.log("UserId: ", data, "reality:", userId);
+				sendSchedulesForCreation(data, schedules);
 			},
 			onError: () => {
 				console.log("Error al crear el empleado");
 			},
 		});
 	};
+
+	const sendSchedulesForCreation = (id: number, list: Schedule[]) => {
+		list.forEach((schedule) => {
+			const scheduleCreation = transformSchedule(schedule, id);
+			requestCreateSchedule(scheduleCreation);
+		});
+	};
+
+	interface ScheduleCreationStructure {
+		entryDayId: number;
+		entryTime: string;
+		exitDayId: number;
+		exitTime: string;
+		controlledUserId: number;
+	}
+
+	const requestCreateSchedule = (s: ScheduleCreationStructure) => {
+		createSchedule.mutate(s, {
+			onSuccess: (data) => {
+				console.log("Horario Creado con éxito");
+				console.log(data);
+			},
+			onError: () => {
+				console.log("Error al crear el Horario");
+			},
+		});
+	};
+
+	function transformSchedule(s: Schedule, userId: number): ScheduleCreationStructure {
+		var result: ScheduleCreationStructure;
+		result = {
+			entryDayId: s.entryDay.id,
+			entryTime: s.entryTime + ":00",
+			exitDayId: s.exitDay.id,
+			exitTime: s.exitTime + ":00",
+			controlledUserId: userId,
+		};
+		return result;
+	}
 
 	const setEmployeeSalary = (salary: string) => {
 		const salaryNum = Number(salary);
@@ -180,23 +219,14 @@ export const AdminUsersCreateEmployee = () => {
 	const setScheduleEntryDay = (entry: string | null) => {
 		const foundDay = daysArray.find((day) => day.name === entry);
 		if (foundDay) {
-			setNewSchedule({ ...newSchedule, entryDayId: foundDay.id });
+			setNewSchedule({ ...newSchedule, entryDay: foundDay });
 		}
 	};
 
 	const setScheduleExitDay = (exit: string | null) => {
 		const foundDay = daysArray.find((day) => day.name === exit);
 		if (foundDay) {
-			setNewSchedule({ ...newSchedule, exitDayId: foundDay.id });
-		}
-	};
-
-	const getDayName = (dayId: number) => {
-		const foundDay = daysArray.find((day) => day.id === dayId);
-		if (foundDay) {
-			return foundDay.name;
-		} else {
-			return "";
+			setNewSchedule({ ...newSchedule, exitDay: foundDay });
 		}
 	};
 
@@ -227,137 +257,137 @@ export const AdminUsersCreateEmployee = () => {
 						minWidth: "70%",
 						bgcolor: "#F0EFEF",
 						padding: "1rem 2rem",
-						minHeight: "70vh",
+						minHeight: "65vh",
 					}}
 				>
 					<h3 style={{ marginTop: "0", fontSize: 24 }}>Nuevo Empleado</h3>
-					<div style={{ display: "table-row-group" }}>
-						<div style={{ display: "table-cell", width: "50%" }}>
-							<FormControl variant="standard" sx={{ width: "95%" }}>
-								<InputLabel htmlFor="standard-adornment-correo" color="warning">
-									Nombre Completo
-								</InputLabel>
-								<Input
-									id="standard-adornment-amount"
-									color="warning"
-									onChange={(e) => setEmployee({ ...employee, name: e.target.value })}
-								/>
-							</FormControl>
-							<FormControl variant="standard" sx={{ width: "95%", marginTop: "7%" }}>
-								<InputLabel htmlFor="standard-adornment-correo" color="warning">
-									Correo electrónico
-								</InputLabel>
-								<Input
-									id="standard-adornment-amount"
-									color="warning"
-									onChange={(e) => setEmployee({ ...employee, email: e.target.value })}
-								/>
-							</FormControl>
-							<FormControl variant="standard" sx={{ width: "95%", marginTop: "7%" }}>
-								<InputLabel htmlFor="standard-adornment-correo" color="warning">
-									Contraseña
-								</InputLabel>
-								<Input
-									id="standard-adornment-amount"
-									color="warning"
-									onChange={(e) => setEmployee({ ...employee, password: e.target.value })}
-								/>
-							</FormControl>
-							<Autocomplete
-								disablePortal
-								id="combo-box-demo"
-								options={jobLabels}
-								sx={{ width: "95%", marginTop: "	%" }}
-								color="warning"
-								onInputChange={(event: any, newValue: string | null) => setEmployeeJob(newValue)}
-								renderInput={(params) => (
-									<TextField {...params} label="Puesto de Trabajo" color="warning" />
-								)}
-							/>
-							<FormControl variant="standard" sx={{ width: "95%", marginTop: "5%" }}>
-								<InputLabel htmlFor="standard-adornment-correo" color="warning">
-									Salario
-								</InputLabel>
-								<Input
-									id="standard-adornment-amount"
-									color="warning"
-									onChange={(e) => setEmployeeSalary(e.target.value)}
-								/>
-							</FormControl>
-						</div>
-						<div style={{ display: "table-cell" }}>
-							<h4>Horarios</h4>
-							<Table>
-								<TableHead>
-									<TableRow>
-										{columns.map((column) => (
-											<StyledTableCell key={column.id} align="center" style={{}}>
-												{column.label}
-											</StyledTableCell>
-										))}
-									</TableRow>
-								</TableHead>
-								<TableBody>
-									{schedules && schedules.length > 0 ? (
-										schedules.map((row) => (
-											<StyledTableRow
-												key={row.entryDayId}
-												sx={{
-													"&:last-child td, &:last-child th": { border: 0 },
-													"&:nth-of-type(odd) .MuiTableCell-body": {
-														color: "#CB8B2A",
-													},
-												}}
-											>
-												<StyledTableCell component="th" scope="row" align="center">
-													{getDayName(row.entryDayId)} {row.entryTime}
-												</StyledTableCell>
-												<StyledTableCell component="th" scope="row" align="center">
-													{getDayName(row.exitDayId)} {row.exitTime}
-												</StyledTableCell>
-											</StyledTableRow>
-										))
-									) : (
-										<StyledTableRow
-											key={0}
-											sx={{
-												"&:last-child td, &:last-child th": { border: 0 },
-												"&:nth-of-type(odd) .MuiTableCell-body": {
-													color: "#CB8B2A",
-												},
-											}}
-										>
-											<StyledTableCell scope="row" align="center" colSpan={5}>
-												No hay horarios agregados
-											</StyledTableCell>
-										</StyledTableRow>
-									)}
-								</TableBody>
-							</Table>
-							<Button
-								variant="contained"
-								sx={{
-									backgroundColor: "#ABABAB",
-									color: "black",
-									"&:hover": {
-										backgroundColor: "#C7882A",
-									},
-									marginTop: "15px",
-									marginLeft: "55%",
-								}}
-								onClick={handleOpenAdd}
-							>
-								Añadir Horario+
-							</Button>
-						</div>
-					</div>
-					<ColorButton
-						variant="contained"
-						style={{ marginTop: "5%" }}
-						onClick={requestCreateEmployee}
-					>
-						Crear Empleado
-					</ColorButton>
+					<Table>
+						<TableBody>
+							<TableCell sx={{ height: "100%" }}>
+								<div>
+									<FormControl variant="standard" sx={{ width: "100%" }}>
+										<InputLabel htmlFor="standard-adornment-correo" color="warning">
+											Nombre Completo
+										</InputLabel>
+										<Input
+											id="standard-adornment-amount"
+											color="warning"
+											onChange={(e) => setEmployee({ ...employee, name: e.target.value })}
+										/>
+									</FormControl>
+								</div>
+								<div>
+									<FormControl variant="standard" sx={{ width: "100%", marginTop: "7%" }}>
+										<InputLabel htmlFor="standard-adornment-correo" color="warning">
+											Correo electrónico
+										</InputLabel>
+										<Input
+											id="standard-adornment-amount"
+											color="warning"
+											onChange={(e) => setEmployee({ ...employee, email: e.target.value })}
+										/>
+									</FormControl>
+								</div>
+								<div>
+									<FormControl variant="standard" sx={{ width: "100%", marginTop: "7%" }}>
+										<InputLabel htmlFor="standard-adornment-correo" color="warning">
+											Contraseña
+										</InputLabel>
+										<Input
+											id="standard-adornment-amount"
+											color="warning"
+											onChange={(e) => setEmployee({ ...employee, password: e.target.value })}
+										/>
+									</FormControl>
+								</div>
+								<div>
+									<Autocomplete
+										disablePortal
+										id="combo-box-demo"
+										options={jobs}
+										sx={{ width: "100%", marginTop: "10%" }}
+										color="warning"
+										onInputChange={(event: any, newValue: string | null) =>
+											setEmployeeJob(newValue)
+										}
+										renderInput={(params) => (
+											<TextField {...params} label="Puesto de Trabajo" color="warning" />
+										)}
+									/>
+								</div>
+								<div>
+									<FormControl variant="standard" sx={{ width: "100%", marginTop: "5%" }}>
+										<InputLabel htmlFor="standard-adornment-correo" color="warning">
+											Salario
+										</InputLabel>
+										<Input
+											id="standard-adornment-amount"
+											color="warning"
+											onChange={(e) => setEmployeeSalary(e.target.value)}
+										/>
+									</FormControl>
+								</div>
+								<div style={{ marginTop: "5%" }} onClick={requestCreateEmployee}>
+									<ColorButton variant="contained">Crear Empleado</ColorButton>
+								</div>
+							</TableCell>
+							<TableCell>
+								<div style={{ display: "flow" }}>
+									<h4>Horarios</h4>
+								</div>
+								<div>
+									<Table sx={{ height: "95%" }}>
+										<TableHead>
+											<TableRow>
+												{columns.map((column) => (
+													<StyledTableCell key={column.id} align="center" style={{}}>
+														{column.label}
+													</StyledTableCell>
+												))}
+											</TableRow>
+										</TableHead>
+										<TableBody>
+											{schedules.map((row) => (
+												<StyledTableRow
+													key={row.entryDay.name}
+													sx={{
+														"&:last-child td, &:last-child th": { border: 0 },
+														"&:nth-of-type(odd) .MuiTableCell-body": {
+															color: "#CB8B2A",
+														},
+													}}
+												>
+													<StyledTableCell component="th" scope="row" align="center">
+														{row.entryDay.name} {row.entryTime}
+													</StyledTableCell>
+													<StyledTableCell component="th" scope="row" align="center">
+														{row.exitDay.name} {row.exitTime}
+													</StyledTableCell>
+												</StyledTableRow>
+											))}
+										</TableBody>
+									</Table>
+								</div>
+								<div>
+									<Button
+										variant="contained"
+										sx={{
+											backgroundColor: "#ABABAB",
+											color: "black",
+											"&:hover": {
+												backgroundColor: "#C7882A",
+											},
+											marginTop: "15px",
+											marginLeft: "51%",
+										}}
+										onClick={handleOpenAdd}
+									>
+										Añadir Horario+
+									</Button>
+								</div>
+							</TableCell>
+						</TableBody>
+					</Table>
 					<Modal
 						open={openAdd}
 						onClose={handleCloseAdd}
@@ -378,7 +408,7 @@ export const AdminUsersCreateEmployee = () => {
 											<Autocomplete
 												disablePortal
 												id="combo-box-demo"
-												options={dayLabels}
+												options={days}
 												sx={{ width: "100%" }}
 												color="warning"
 												onInputChange={(event: any, newValue: string | null) =>
@@ -397,7 +427,7 @@ export const AdminUsersCreateEmployee = () => {
 												sx={{ width: "100%" }}
 												color="warning"
 												onInputChange={(event: any, newValue: string) =>
-													setNewSchedule({ ...newSchedule, entryTime: newValue + ":00" })
+													setNewSchedule({ ...newSchedule, entryTime: newValue })
 												}
 												renderInput={(params) => (
 													<TextField {...params} label="Horario" color="warning" />
@@ -413,7 +443,7 @@ export const AdminUsersCreateEmployee = () => {
 											<Autocomplete
 												disablePortal
 												id="combo-box-demo"
-												options={dayLabels}
+												options={days}
 												sx={{ width: "100%" }}
 												color="warning"
 												onInputChange={(event: any, newValue: string | null) =>
@@ -432,7 +462,7 @@ export const AdminUsersCreateEmployee = () => {
 												sx={{ width: "100%" }}
 												color="warning"
 												onInputChange={(event: any, newValue: string) =>
-													setNewSchedule({ ...newSchedule, exitTime: newValue + ":00" })
+													setNewSchedule({ ...newSchedule, exitTime: newValue })
 												}
 												renderInput={(params) => (
 													<TextField {...params} label="Horario" color="warning" />

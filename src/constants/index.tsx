@@ -1,9 +1,9 @@
 export enum DayRemoteId {
-	Sunday = 7,
-	Monday = 1,
-	Tuesday = 2,
-	Wednesday = 3,
-	Thursday = 4,
-	Friday = 5,
-	Saturday = 6,
+	Domingo = 7,
+	Lunes = 1,
+	Martes = 2,
+	Miercoles = 3,
+	Jueves = 4,
+	Viernes = 5,
+	Sabado = 6,
 }
