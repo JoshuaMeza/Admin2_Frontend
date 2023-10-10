@@ -7,7 +7,9 @@ import {
 	Job,
 	Day,
 	ControlledUser,
+	FullEmployee,
 } from "../../interfaces";
+import { useMediaQuery } from "@mui/material";
 
 export const useGetJobs = () => {
 	return useMutation({
@@ -99,6 +101,37 @@ export const useCreateEmployee = () => {
 	});
 };
 
+interface ScheduleCreationStructure {
+	id: number;
+	entryDayId: number;
+	entryTime: string;
+	exitDayId: number;
+	exitTime: string;
+}
+
+interface UpdatableUser {
+	id: number;
+	name: string;
+	email: string;
+	password: string;
+	salary: number;
+	jobId: number;
+	active: true;
+	schedules: ScheduleCreationStructure[];
+}
+
+export const useUpdateEmployee = () => {
+	return useMutation({
+		mutationKey: ["Employees"],
+		mutationFn: async (user: Omit<UpdatableUser, "password">) => {
+			const { data } = await httpClient.put<string>(`/user/${user.id}`, {
+				...user,
+			});
+			return data;
+		},
+	});
+};
+
 export const useDeactivateEmployee = () => {
 	return useMutation({
 		mutationKey: ["Employees"],
@@ -125,6 +158,15 @@ export const useCreateSchedule = () => {
 				...schedule,
 			});
 			return data;
+		},
+	});
+};
+
+export const useDeleteSchedule = () => {
+	return useMutation({
+		mutationKey: ["Schedules"],
+		mutationFn: async (id: number) => {
+			await httpClient.delete<string>(`/schedules/${id}`);
 		},
 	});
 };

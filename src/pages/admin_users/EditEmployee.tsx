@@ -7,6 +7,7 @@ import {
 	ButtonProps,
 	Container,
 	FormControl,
+	IconButton,
 	Input,
 	InputLabel,
 	Modal,
@@ -21,9 +22,19 @@ import {
 	tableCellClasses,
 } from "@mui/material";
 import { useNavigate } from "react-router-dom";
+import DeleteIcon from "@mui/icons-material/Delete";
+import EditIcon from "@mui/icons-material/Edit";
 import React, { useEffect, useState } from "react";
-import { Day, FullEmployee, Job } from "../../interfaces";
-import { useGetControlledUser, useGetDays, useGetJobs } from "../../api";
+import { Day, FullEmployee, Job, Schedule } from "../../interfaces";
+import {
+	useDeleteSchedule,
+	useGetControlledUser,
+	useGetDays,
+	useGetJobs,
+	useGetSchedulesOfEmployee,
+	useUpdateEmployee,
+} from "../../api";
+import { DeleteAlertDialog } from "../../components/DeleteAlertDialog";
 
 const ColorButton = styled(Button)<ButtonProps>(({ theme }) => ({
 	color: theme.palette.getContrastText("#CB8B2A"),
@@ -64,7 +75,10 @@ export const AdminUsersEditEmployee = () => {
 	const location = useLocation();
 	const getDays = useGetDays();
 	const getJobs = useGetJobs();
+	const getSchedules = useGetSchedulesOfEmployee();
 	const getEmployee = useGetControlledUser();
+	const updateEmployee = useUpdateEmployee();
+	const deleteSchedule = useDeleteSchedule();
 	const [employee, setEmployee] = useState<FullEmployee>({
 		id: 0,
 		name: "",
@@ -79,36 +93,92 @@ export const AdminUsersEditEmployee = () => {
 		active: true,
 	});
 	const [openAdd, setOpenAdd] = React.useState(false);
+	const [openEdit, setOpenEdit] = React.useState(false);
+	const [openDelete, setOpenDelete] = useState(false);
 	const handleOpenAdd = () => setOpenAdd(true);
 	const handleCloseAdd = () => setOpenAdd(false);
 	const [dayLabels, setDayLabels] = useState<{ label: string }[]>([]);
 	const [daysArray, setDaysArray] = useState<Day[]>([]);
 	const [jobLabels, setJobLabels] = useState<{ label: string }[]>([]);
 	const [jobsArray, setJobsArray] = useState<Job[]>([]);
-	const [employeeJob, setEmployeeJob] = useState<Job>({
-		id: 0,
-		name: "",
-		area: "",
-	});
 	const columns: Column[] = [
 		{ id: "entry", label: "Entrada", minWidth: 90 },
 		{ id: "deparure", label: "Salida", minWidth: 90 },
 		{ id: "operations", label: "Opciones", minWidth: 60 },
 	];
-	const [schedules, setSchedules] = useState<ScheduleCreationStructure[]>([]);
-	const [newSchedule, setNewSchedule] = useState<ScheduleCreationStructure>({
-		entryDayId: 0,
+	const [schedules, setSchedules] = useState<Schedule[]>([]);
+	const [newSchedule, setNewSchedule] = useState<Schedule>({
+		id: 0,
+		entryDay: {
+			id: 0,
+			name: "",
+		},
 		entryTime: "",
-		exitDayId: 0,
+		exitDay: {
+			id: 0,
+			name: "",
+		},
 		exitTime: "",
 	});
 
 	interface ScheduleCreationStructure {
+		id: number;
 		entryDayId: number;
 		entryTime: string;
 		exitDayId: number;
 		exitTime: string;
 	}
+
+	const [updatableUser, setUpdatableUser] = useState<{
+		id: number;
+		name: string;
+		email: string;
+		password: string;
+		salary: number;
+		jobId: number;
+		active: boolean;
+		schedules: ScheduleCreationStructure[];
+	}>({
+		id: 0,
+		name: "",
+		email: "",
+		password: "",
+		salary: 0,
+		jobId: 0,
+		active: true,
+		schedules: [],
+	});
+
+	const handleOpenEdit = (s: Schedule) => {
+		setNewSchedule(s);
+		setOpenEdit(true);
+	};
+	const handleOpenDelete = (s: Schedule) => {
+		setNewSchedule(s);
+		setOpenDelete(true);
+	};
+	const handleCloseEdit = () => {
+		setOpenEdit(false);
+	};
+	const handleCloseDelete = () => {
+		setOpenDelete(false);
+	};
+
+	const handleEditSchedule = (s: Schedule) => {
+		const editableSchedule = schedules.findIndex((schedule) => schedule.id === s.id);
+		if (editableSchedule >= 0) {
+			schedules[editableSchedule] = s;
+		}
+		handleCloseEdit();
+	};
+
+	const handleDeleteSchedule = (scheduleId: number) => {
+		const deletableSchedule = schedules.findIndex((schedule) => schedule.id === scheduleId);
+		if (deletableSchedule >= 0 && deletableSchedule < schedules.length) {
+			schedules.splice(deletableSchedule, 1);
+		}
+		handleCloseDelete();
+	};
 
 	const requestEmployee = (userId: number) => {
 		getEmployee.mutate(userId, {
@@ -152,6 +222,15 @@ export const AdminUsersEditEmployee = () => {
 		});
 	};
 
+	const requestEmployeeSchedule = (userId: number) => {
+		getSchedules.mutate(userId, {
+			onSuccess: (data) => {
+				console.log(data);
+				setSchedules(data);
+			},
+		});
+	};
+
 	const setEmployeeSalary = (salary: string) => {
 		const salaryNum = Number(salary);
 		setEmployee({ ...employee, salary: salaryNum });
@@ -160,48 +239,59 @@ export const AdminUsersEditEmployee = () => {
 	const setEmployeeJobEntity = (jobName: string | null) => {
 		const foundJob = jobsArray.find((jobObject) => jobObject.name === jobName);
 		if (foundJob) {
-			setEmployeeJob(foundJob);
+			setEmployee({ ...employee, job: foundJob });
 		}
 	};
 
 	const setScheduleEntryDay = (entry: string | null) => {
 		const foundDay = daysArray.find((day) => day.name === entry);
 		if (foundDay) {
-			setNewSchedule({ ...newSchedule, entryDayId: foundDay.id });
+			setNewSchedule({ ...newSchedule, entryDay: foundDay });
 		}
 	};
 
 	const setScheduleExitDay = (exit: string | null) => {
 		const foundDay = daysArray.find((day) => day.name === exit);
 		if (foundDay) {
-			setNewSchedule({ ...newSchedule, exitDayId: foundDay.id });
+			setNewSchedule({ ...newSchedule, exitDay: foundDay });
 		}
 	};
 
-	const getDayName = (dayId: number) => {
-		const foundDay = daysArray.find((day) => day.id === dayId);
-		if (foundDay) {
-			return foundDay.name;
-		} else {
-			return "";
-		}
-	};
-
-	const handleAddSchedule = (newS: ScheduleCreationStructure) => {
+	const handleAddSchedule = (newS: Schedule) => {
 		if (newS) {
 			setSchedules([...schedules, newS]);
-			//employee.schedules.push(newS);
 			handleCloseAdd();
 		} else {
 			console.log("Error al agregar el nuevo horario");
 		}
 	};
 
+	function transformSchedules(schedules: Schedule[]): ScheduleCreationStructure[] {
+		var list: ScheduleCreationStructure[];
+
+		return list;
+	}
+
+	const handleEditEmployee = () => {
+		setUpdatableUser({
+			id: employee.id,
+			name: employee.name,
+			email: employee.email,
+			password: employee.password,
+			salary: employee.salary,
+			active: employee.active,
+			jobId: employee.job.id,
+			schedules: schedules,
+		});
+		requestEditEmployee();
+	};
+
 	const requestEditEmployee = () => {};
+	const requestDeleteSchedule = () => {};
 
 	useEffect(() => {
-		console.log(location.state.employee_id);
 		requestEmployee(location.state.employee_id);
+		requestEmployeeSchedule(location.state.employee_id);
 		requestDays();
 		requestJobs();
 	}, []);
@@ -219,6 +309,11 @@ export const AdminUsersEditEmployee = () => {
 
 	return (
 		<>
+			<DeleteAlertDialog
+				isOpen={openDelete}
+				onClose={handleCloseDelete}
+				handleClose={() => handleDeleteSchedule(newSchedule.id)}
+			></DeleteAlertDialog>
 			<Container
 				maxWidth="lg"
 				sx={{
@@ -303,7 +398,7 @@ export const AdminUsersEditEmployee = () => {
 									{schedules && schedules.length > 0 ? (
 										schedules.map((row) => (
 											<StyledTableRow
-												key={row.entryDayId}
+												key={row.entryDay.name}
 												sx={{
 													"&:last-child td, &:last-child th": { border: 0 },
 													"&:nth-of-type(odd) .MuiTableCell-body": {
@@ -312,10 +407,18 @@ export const AdminUsersEditEmployee = () => {
 												}}
 											>
 												<StyledTableCell component="th" scope="row" align="center">
-													{getDayName(row.entryDayId)} {row.entryTime}
+													{row.entryDay.name} {row.entryTime}
 												</StyledTableCell>
 												<StyledTableCell component="th" scope="row" align="center">
-													{getDayName(row.exitDayId)} {row.exitTime}
+													{row.exitDay.name} {row.exitTime}
+												</StyledTableCell>
+												<StyledTableCell>
+													<IconButton aria-label="edit" onClick={() => handleOpenEdit(row)}>
+														<EditIcon />
+													</IconButton>
+													<IconButton aria-label="delete" onClick={() => handleOpenDelete(row)}>
+														<DeleteIcon />
+													</IconButton>
 												</StyledTableCell>
 											</StyledTableRow>
 										))
@@ -353,11 +456,7 @@ export const AdminUsersEditEmployee = () => {
 							</Button>
 						</div>
 					</div>
-					<ColorButton
-						variant="contained"
-						style={{ marginTop: "5%" }}
-						onClick={requestEditEmployee}
-					>
+					<ColorButton variant="contained" style={{ marginTop: "5%" }} onClick={handleEditEmployee}>
 						Editar Empleado
 					</ColorButton>
 					<Modal
@@ -458,6 +557,111 @@ export const AdminUsersEditEmployee = () => {
 								onClick={() => handleAddSchedule(newSchedule)}
 							>
 								Añadir Horario
+							</Button>
+						</Box>
+					</Modal>
+					<Modal
+						open={openEdit}
+						onClose={handleCloseEdit}
+						aria-labelledby="modal-modal-title"
+						aria-describedby="modal-modal-description"
+					>
+						<Box sx={style}>
+							<Typography id="modal-modal-title" variant="h6" component="h3">
+								Horario:
+							</Typography>
+							<Table>
+								<TableBody>
+									<TableRow>
+										<TableCell>
+											<Typography>Entrada</Typography>
+										</TableCell>
+										<TableCell>
+											<Autocomplete
+												disablePortal
+												id="combo-box-demo"
+												options={dayLabels}
+												sx={{ width: "100%" }}
+												color="warning"
+												value={{ label: newSchedule.entryDay.name }}
+												onInputChange={(event: any, newValue: string | null) =>
+													setScheduleEntryDay(newValue)
+												}
+												renderInput={(params) => (
+													<TextField {...params} label="Día" color="warning" />
+												)}
+											/>
+										</TableCell>
+										<TableCell>
+											<Autocomplete
+												disablePortal
+												id="combo-box-demo"
+												options={dayTimes}
+												sx={{ width: "100%" }}
+												color="warning"
+												value={{ label: newSchedule.entryTime }}
+												onInputChange={(event: any, newValue: string) =>
+													setNewSchedule({ ...newSchedule, entryTime: newValue })
+												}
+												renderInput={(params) => (
+													<TextField {...params} label="Horario" color="warning" />
+												)}
+											/>
+										</TableCell>
+									</TableRow>
+									<TableRow>
+										<TableCell>
+											<Typography>Salida </Typography>
+										</TableCell>
+										<TableCell>
+											<Autocomplete
+												disablePortal
+												id="combo-box-demo"
+												options={dayLabels}
+												sx={{ width: "100%" }}
+												color="warning"
+												value={{ label: newSchedule.exitDay.name }}
+												onInputChange={(event: any, newValue: string | null) =>
+													setScheduleExitDay(newValue)
+												}
+												renderInput={(params) => (
+													<TextField {...params} label="Día" color="warning" />
+												)}
+											/>
+										</TableCell>
+										<TableCell>
+											<Autocomplete
+												disablePortal
+												id="combo-box-demo"
+												options={dayTimes}
+												sx={{ width: "100%" }}
+												color="warning"
+												value={{ label: newSchedule.exitTime }}
+												onInputChange={(event: any, newValue: string) =>
+													setNewSchedule({ ...newSchedule, exitTime: newValue })
+												}
+												renderInput={(params) => (
+													<TextField {...params} label="Horario" color="warning" />
+												)}
+											/>
+										</TableCell>
+									</TableRow>
+								</TableBody>
+							</Table>
+							<Button
+								variant="contained"
+								sx={{
+									backgroundColor: "#ABABAB",
+									color: "black",
+									"&:hover": {
+										backgroundColor: "#C7882A",
+									},
+									marginTop: "20px",
+									marginLeft: "65%",
+								}}
+								onClick={() => handleEditSchedule(newSchedule)}
+							>
+								Editar Horario
 							</Button>
 						</Box>
 					</Modal>
