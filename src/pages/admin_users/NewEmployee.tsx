@@ -20,8 +20,8 @@ import {
 	tableCellClasses,
 } from "@mui/material";
 import React, { useEffect, useState } from "react";
-import { Day, Job, Schedule } from "../../interfaces";
-import { useCreateEmployee, useCreateSchedule, useGetDays, useGetJobs } from "../../api";
+import { Day, Job } from "../../interfaces";
+import { useCreateEmployee, useGetDays, useGetJobs } from "../../api";
 
 const ColorButton = styled(Button)<ButtonProps>(({ theme }) => ({
 	color: theme.palette.getContrastText("#CB8B2A"),
@@ -62,8 +62,6 @@ export const AdminUsersCreateEmployee = () => {
 	const getDays = useGetDays();
 	const getJobs = useGetJobs();
 	const createEmployee = useCreateEmployee();
-	const createSchedule = useCreateSchedule();
-	var userId = 0;
 	const [openAdd, setOpenAdd] = React.useState(false);
 	const handleOpenAdd = () => setOpenAdd(true);
 	const handleCloseAdd = () => setOpenAdd(false);
@@ -73,26 +71,19 @@ export const AdminUsersCreateEmployee = () => {
 		requestJobs();
 	}, []);
 
-	const [days, setDays] = useState<{ label: string }[]>([]);
+	const [dayLabels, setDayLabels] = useState<{ label: string }[]>([]);
 	const [daysArray, setDaysArray] = useState<Day[]>([]);
-	const [jobs, setJobs] = useState<{ label: string }[]>([]);
+	const [jobLabels, setJobLabels] = useState<{ label: string }[]>([]);
 	const [jobsArray, setJobsArray] = useState<Job[]>([]);
 	const columns: Column[] = [
 		{ id: "entry", label: "Entrada", minWidth: 120 },
 		{ id: "deparure", label: "Salida", minWidth: 120 },
 	];
-	const [schedules, setSchedules] = useState<Schedule[]>([]);
-	const [newSchedule, setNewSchedule] = useState<Schedule>({
-		id: 0,
-		entryDay: {
-			id: 0,
-			name: "",
-		},
+	const [schedules, setSchedules] = useState<ScheduleCreationStructure[]>([]);
+	const [newSchedule, setNewSchedule] = useState<ScheduleCreationStructure>({
+		entryDayId: 0,
 		entryTime: "",
-		exitDay: {
-			id: 0,
-			name: "",
-		},
+		exitDayId: 0,
 		exitTime: "",
 	});
 	const [employee, setEmployee] = useState<{
@@ -102,6 +93,7 @@ export const AdminUsersCreateEmployee = () => {
 		active: boolean;
 		salary: number;
 		jobId: number;
+		schedules: ScheduleCreationStructure[];
 	}>({
 		name: "",
 		email: "",
@@ -109,14 +101,30 @@ export const AdminUsersCreateEmployee = () => {
 		salary: 0,
 		active: true,
 		jobId: 0,
+		schedules: [],
 	});
+
+	interface ScheduleCreationStructure {
+		entryDayId: number;
+		entryTime: string;
+		exitDayId: number;
+		exitTime: string;
+	}
+
+	function transformDaysArray(days: Day[]): { label: string }[] {
+		return days.map((day) => ({ label: day.name }));
+	}
+
+	function transformJobsArray(jobs: Job[]): { label: string }[] {
+		return jobs.map((job) => ({ label: job.name }));
+	}
 
 	const requestDays = () => {
 		getDays.mutate(undefined, {
 			onSuccess: (data) => {
 				setDaysArray(data);
 				var transformedDays = transformDaysArray(data);
-				setDays(transformedDays);
+				setDayLabels(transformedDays);
 			},
 			onError: () => {
 				console.log("Error al cargar los días");
@@ -129,22 +137,15 @@ export const AdminUsersCreateEmployee = () => {
 			onSuccess: (data) => {
 				setJobsArray(data);
 				var transformedJobs = transformJobsArray(data);
-				setJobs(transformedJobs);
+				setJobLabels(transformedJobs);
 			},
 		});
 	};
 
-	function transformDaysArray(days: Day[]): { label: string }[] {
-		return days.map((day) => ({ label: day.name }));
-	}
-
-	function transformJobsArray(jobs: Job[]): { label: string }[] {
-		return jobs.map((job) => ({ label: job.name }));
-	}
-
-	const handleAddSchedule = (newS: Schedule) => {
+	const handleAddSchedule = (newS: ScheduleCreationStructure) => {
 		if (newS) {
 			setSchedules([...schedules, newS]);
+			employee.schedules.push(newS);
 			handleCloseAdd();
 		} else {
 			console.log("Error al agregar el nuevo horario");
@@ -152,57 +153,17 @@ export const AdminUsersCreateEmployee = () => {
 	};
 
 	const requestCreateEmployee = () => {
+		console.log(employee);
 		createEmployee.mutate(employee, {
 			onSuccess: (data) => {
 				console.log("Empleado creado con éxito");
-				userId = data;
-				console.log("UserId: ", data, "reality:", userId);
-				sendSchedulesForCreation(data, schedules);
+				console.log(data);
 			},
 			onError: () => {
 				console.log("Error al crear el empleado");
 			},
 		});
 	};
-
-	const sendSchedulesForCreation = (id: number, list: Schedule[]) => {
-		list.forEach((schedule) => {
-			const scheduleCreation = transformSchedule(schedule, id);
-			requestCreateSchedule(scheduleCreation);
-		});
-	};
-
-	interface ScheduleCreationStructure {
-		entryDayId: number;
-		entryTime: string;
-		exitDayId: number;
-		exitTime: string;
-		controlledUserId: number;
-	}
-
-	const requestCreateSchedule = (s: ScheduleCreationStructure) => {
-		createSchedule.mutate(s, {
-			onSuccess: (data) => {
-				console.log("Horario Creado con éxito");
-				console.log(data);
-			},
-			onError: () => {
-				console.log("Error al crear el Horario");
-			},
-		});
-	};
-
-	function transformSchedule(s: Schedule, userId: number): ScheduleCreationStructure {
-		var result: ScheduleCreationStructure;
-		result = {
-			entryDayId: s.entryDay.id,
-			entryTime: s.entryTime + ":00",
-			exitDayId: s.exitDay.id,
-			exitTime: s.exitTime + ":00",
-			controlledUserId: userId,
-		};
-		return result;
-	}
 
 	const setEmployeeSalary = (salary: string) => {
 		const salaryNum = Number(salary);
@@ -219,14 +180,23 @@ export const AdminUsersCreateEmployee = () => {
 	const setScheduleEntryDay = (entry: string | null) => {
 		const foundDay = daysArray.find((day) => day.name === entry);
 		if (foundDay) {
-			setNewSchedule({ ...newSchedule, entryDay: foundDay });
+			setNewSchedule({ ...newSchedule, entryDayId: foundDay.id });
 		}
 	};
 
 	const setScheduleExitDay = (exit: string | null) => {
 		const foundDay = daysArray.find((day) => day.name === exit);
 		if (foundDay) {
-			setNewSchedule({ ...newSchedule, exitDay: foundDay });
+			setNewSchedule({ ...newSchedule, exitDayId: foundDay.id });
+		}
+	};
+
+	const getDayName = (dayId: number) => {
+		const foundDay = daysArray.find((day) => day.id === dayId);
+		if (foundDay) {
+			return foundDay.name;
+		} else {
+			return "";
 		}
 	};
 
@@ -296,7 +266,7 @@ export const AdminUsersCreateEmployee = () => {
 							<Autocomplete
 								disablePortal
 								id="combo-box-demo"
-								options={jobs}
+								options={jobLabels}
 								sx={{ width: "95%", marginTop: "	%" }}
 								color="warning"
 								onInputChange={(event: any, newValue: string | null) => setEmployeeJob(newValue)}
@@ -331,7 +301,7 @@ export const AdminUsersCreateEmployee = () => {
 									{schedules && schedules.length > 0 ? (
 										schedules.map((row) => (
 											<StyledTableRow
-												key={row.entryDay.name}
+												key={row.entryDayId}
 												sx={{
 													"&:last-child td, &:last-child th": { border: 0 },
 													"&:nth-of-type(odd) .MuiTableCell-body": {
@@ -340,10 +310,10 @@ export const AdminUsersCreateEmployee = () => {
 												}}
 											>
 												<StyledTableCell component="th" scope="row" align="center">
-													{row.entryDay.name} {row.entryTime}
+													{getDayName(row.entryDayId)} {row.entryTime}
 												</StyledTableCell>
 												<StyledTableCell component="th" scope="row" align="center">
-													{row.exitDay.name} {row.exitTime}
+													{getDayName(row.exitDayId)} {row.exitTime}
 												</StyledTableCell>
 											</StyledTableRow>
 										))
@@ -408,7 +378,7 @@ export const AdminUsersCreateEmployee = () => {
 											<Autocomplete
 												disablePortal
 												id="combo-box-demo"
-												options={days}
+												options={dayLabels}
 												sx={{ width: "100%" }}
 												color="warning"
 												onInputChange={(event: any, newValue: string | null) =>
@@ -427,7 +397,7 @@ export const AdminUsersCreateEmployee = () => {
 												sx={{ width: "100%" }}
 												color="warning"
 												onInputChange={(event: any, newValue: string) =>
-													setNewSchedule({ ...newSchedule, entryTime: newValue })
+													setNewSchedule({ ...newSchedule, entryTime: newValue + ":00" })
 												}
 												renderInput={(params) => (
 													<TextField {...params} label="Horario" color="warning" />
@@ -443,7 +413,7 @@ export const AdminUsersCreateEmployee = () => {
 											<Autocomplete
 												disablePortal
 												id="combo-box-demo"
-												options={days}
+												options={dayLabels}
 												sx={{ width: "100%" }}
 												color="warning"
 												onInputChange={(event: any, newValue: string | null) =>
@@ -462,7 +432,7 @@ export const AdminUsersCreateEmployee = () => {
 												sx={{ width: "100%" }}
 												color="warning"
 												onInputChange={(event: any, newValue: string) =>
-													setNewSchedule({ ...newSchedule, exitTime: newValue })
+													setNewSchedule({ ...newSchedule, exitTime: newValue + ":00" })
 												}
 												renderInput={(params) => (
 													<TextField {...params} label="Horario" color="warning" />
