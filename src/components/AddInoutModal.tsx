@@ -48,19 +48,20 @@ export const AddInoutModal = ({ isOpen, onClose, handleClose }: Props) => {
 		<>
 			<Modal open={isOpen} onClose={onClose}>
 				<Box sx={style}>
-					<Typography id="modal-modal-title" variant="h6" component="h3">
+					<Typography variant="h6" component="h3">
 						Registrar entrada/salida:
 					</Typography>
 					<Table>
 						<TableBody>
 							<TableRow>
-								<TableCell>
+								<TableCell sx={{ width: "30%" }}>
 									<Typography>Momento de registro</Typography>
 								</TableCell>
-								<TableCell>
+								<TableCell sx={{ width: "70%" }}>
 									<LocalizationProvider dateAdapter={AdapterDayjs}>
 										<DemoContainer components={["DateTimePicker"]}>
 											<DateTimePicker
+												sx={{ width: "100%" }}
 												label="Selecciona un día y una hora"
 												value={userInput.time}
 												onChange={(newValue) => setUserInput({ ...userInput, time: newValue })}

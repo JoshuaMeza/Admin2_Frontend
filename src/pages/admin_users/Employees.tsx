@@ -34,6 +34,7 @@ import { ListedEmployee, PaginationData } from "../../interfaces";
 import { SchedulesModal } from "../../components/SchedulesModal";
 import { useToggle } from "../../hooks";
 import { AddInoutModal, DeleteAlertDialog } from "../../components";
+import { GenerateReportModal } from "../../components/GenerateReportModal";
 
 const StyledTableCell = styled(TableCell)(({ theme }) => ({
 	[`&.${tableCellClasses.head}`]: {
@@ -80,6 +81,7 @@ export const AdminUsersEmployees = () => {
 	const [isOpenDeleteEmployee, toggleDeleteEmployee] = useToggle();
 	const [isOpenSchedules, toggleSchedules] = useToggle();
 	const [isOpenInout, toggleInout] = useToggle();
+	const [isOpenReports, toggleReports] = useToggle();
 	const [currentEmployee, setCurrentEmployee] = useState<ListedEmployee>({
 		id: 0,
 		name: "",
@@ -179,6 +181,7 @@ export const AdminUsersEmployees = () => {
 
 	return (
 		<>
+			<GenerateReportModal isOpen={isOpenReports} onClose={toggleReports}></GenerateReportModal>
 			<AddInoutModal
 				isOpen={isOpenInout}
 				onClose={toggleInout}
@@ -214,6 +217,27 @@ export const AdminUsersEmployees = () => {
 			>
 				<Box sx={{ minWidth: "70%", bgcolor: "#F0EFEF", padding: "2.5rem 1.5rem" }}>
 					<h2 style={{ marginTop: "0" }}>Tabla de empleados</h2>
+
+					<Box
+						sx={{
+							display: "flex",
+							justifyContent: "end",
+							alignItems: "center",
+							marginBottom: "1rem",
+						}}
+					>
+						<Button
+							variant="contained"
+							sx={{
+								backgroundColor: "#ABABAB",
+								color: "black",
+								"&:hover": { backgroundColor: "#858585" },
+							}}
+							onClick={toggleReports}
+						>
+							Generar Reporte
+						</Button>
+					</Box>
 
 					<Paper sx={{ width: "100%", overflow: "hidden" }}>
 						<TableContainer sx={{ maxHeight: 440 }}>
@@ -287,7 +311,7 @@ export const AdminUsersEmployees = () => {
 												},
 											}}
 										>
-											<StyledTableCell scope="row" align="center" colSpan={5}>
+											<StyledTableCell scope="row" align="center" colSpan={columns.length}>
 												No hay empleados para mostrar
 											</StyledTableCell>
 										</StyledTableRow>
@@ -306,12 +330,18 @@ export const AdminUsersEmployees = () => {
 						/>
 					</Paper>
 
-					<ColorButton
-						style={{ marginTop: "15px", marginLeft: "86%" }}
-						onClick={() => handleNewEmployee()}
+					<Box
+						sx={{
+							display: "flex",
+							justifyContent: "end",
+							alignItems: "center",
+							marginBottom: "1rem",
+						}}
 					>
-						Añadir +
-					</ColorButton>
+						<ColorButton style={{ marginTop: "1rem" }} onClick={() => handleNewEmployee()}>
+							Añadir +
+						</ColorButton>
+					</Box>
 				</Box>
 			</Container>
 		</>
