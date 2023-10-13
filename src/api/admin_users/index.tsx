@@ -1,13 +1,6 @@
 import { useMutation } from "@tanstack/react-query";
 import { httpClient } from "../../helpers";
-import {
-	ListedEmployee,
-	PaginationData,
-	Schedule,
-	Job,
-	Day,
-	ControlledUser,
-} from "../../interfaces";
+import { ListedEmployee, PaginationData, Schedule, Job, Day } from "../../interfaces";
 
 export const useGetJobs = () => {
 	return useMutation({
@@ -152,6 +145,18 @@ export const useRegisterInout = () => {
 			const { data } = await httpClient.post<unknown>(`/user/user/${employee_id}/register_inout`, {
 				arriving,
 				dateTimeRecord,
+			});
+			return data;
+		},
+	});
+};
+
+export const useDownloadUsersReport = () => {
+	return useMutation({
+		mutationKey: ["Employees"],
+		mutationFn: async () => {
+			const { data } = await httpClient.get<Blob>("/reports/users", {
+				responseType: "blob",
 			});
 			return data;
 		},

@@ -19,6 +19,7 @@ import { Dayjs } from "dayjs";
 import { DatePicker, LocalizationProvider } from "@mui/x-date-pickers";
 import { AdapterDayjs } from "@mui/x-date-pickers/AdapterDayjs";
 import { DemoContainer } from "@mui/x-date-pickers/internals/demo";
+import { useDownloadUsersReport } from "../api";
 
 interface Props {
 	isOpen: boolean;
@@ -28,6 +29,7 @@ interface Props {
 interface ReportOption {
 	id: number;
 	label: string;
+	downloader: () => void;
 }
 
 interface UserInput {
@@ -36,16 +38,13 @@ interface UserInput {
 }
 
 export const GenerateReportModal = ({ isOpen, onClose }: Props) => {
-	const [selectedReport, setSelectedReport] = useState<ReportOption>();
+	const downloadUsersReport = useDownloadUsersReport();
+	const [reportType, setReportType] = useState<ReportOption>();
 	const [userInput, setUserInput] = useState<UserInput>({
 		startDate: null,
 		endDate: null,
 	});
-	const reports: ReportOption[] = [
-		{ id: ReportType.Users, label: "Listado de usuarios" },
-		{ id: ReportType.Payments, label: "Conteo de horas y pagos" },
-		{ id: ReportType.History, label: "Historial de asistencia" },
-	];
+
 	const style = {
 		position: "absolute",
 		top: "50%",
@@ -58,8 +57,34 @@ export const GenerateReportModal = ({ isOpen, onClose }: Props) => {
 	};
 
 	const selectReport = (event: SelectChangeEvent) => {
-		setSelectedReport(reports.find((report) => report.id == parseInt(event.target.value)));
+		setReportType(reports.find((report) => report.id == parseInt(event.target.value)));
 	};
+
+	const requestUsersReport = () => {
+		return downloadUsersReport.mutate(undefined, {
+			onSuccess(data) {
+				handleDownloadExcel(data);
+			},
+		});
+	};
+
+	const handleDownloadExcel = (originalData: Blob) => {
+		const data = new Blob([originalData], { type: "application/vnd.ms-excel" });
+		const href = URL.createObjectURL(data);
+		const link = document.createElement("a");
+		link.href = href;
+		link.setAttribute("download", "file.xls");
+		document.body.appendChild(link);
+		link.click();
+		document.body.removeChild(link);
+		URL.revokeObjectURL(href);
+	};
+
+	const reports: ReportOption[] = [
+		{ id: ReportType.Users, label: "Listado de usuarios", downloader: requestUsersReport },
+		{ id: ReportType.Payments, label: "Conteo de horas y pagos", downloader: () => {} },
+		{ id: ReportType.History, label: "Historial de asistencia", downloader: () => {} },
+	];
 
 	return (
 		<>
@@ -78,7 +103,7 @@ export const GenerateReportModal = ({ isOpen, onClose }: Props) => {
 									<FormControl fullWidth>
 										<InputLabel>Selecciona un tipo</InputLabel>
 										<Select
-											value={selectedReport ? `${selectedReport.id}` : ""}
+											value={reportType ? `${reportType.id}` : ""}
 											label="Seleccione un tipo"
 											onChange={selectReport}
 										>
@@ -91,11 +116,10 @@ export const GenerateReportModal = ({ isOpen, onClose }: Props) => {
 									</FormControl>
 								</TableCell>
 							</TableRow>
-							{selectedReport?.id == ReportType.Payments ||
-							selectedReport?.id == ReportType.History ? (
+							{reportType?.id == ReportType.Payments || reportType?.id == ReportType.History ? (
 								<TableRow>
 									<TableCell>
-										{selectedReport?.id == ReportType.Payments ? "Fecha de inicio" : "Fecha"}
+										{reportType?.id == ReportType.Payments ? "Fecha de inicio" : "Fecha"}
 									</TableCell>
 									<TableCell>
 										<LocalizationProvider dateAdapter={AdapterDayjs}>
@@ -113,7 +137,7 @@ export const GenerateReportModal = ({ isOpen, onClose }: Props) => {
 									</TableCell>
 								</TableRow>
 							) : undefined}
-							{selectedReport?.id == ReportType.Payments ? (
+							{reportType?.id == ReportType.Payments ? (
 								<TableRow>
 									<TableCell>Fecha de finalización</TableCell>
 									<TableCell>
@@ -144,7 +168,7 @@ export const GenerateReportModal = ({ isOpen, onClose }: Props) => {
 							display: "block",
 							margin: "20px auto 0",
 						}}
-						onClick={() => {}}
+						onClick={() => reportType?.downloader()}
 					>
 						Guardar
 					</Button>
