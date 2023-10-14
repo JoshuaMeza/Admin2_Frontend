@@ -15,21 +15,20 @@ import {
 } from "@mui/material";
 import { ReportType } from "../constants";
 import { useState } from "react";
-import { Dayjs } from "dayjs";
+import dayjs, { Dayjs } from "dayjs";
 import { DatePicker, LocalizationProvider } from "@mui/x-date-pickers";
 import { AdapterDayjs } from "@mui/x-date-pickers/AdapterDayjs";
 import { DemoContainer } from "@mui/x-date-pickers/internals/demo";
-import { useDownloadUsersReport } from "../api";
 
 interface Props {
 	isOpen: boolean;
 	onClose: () => void;
+	handleClose: (reportTypeId: number, data: UserInput) => void;
 }
 
 interface ReportOption {
 	id: number;
 	label: string;
-	downloader: () => void;
 }
 
 interface UserInput {
@@ -37,14 +36,17 @@ interface UserInput {
 	endDate: Dayjs | null;
 }
 
-export const GenerateReportModal = ({ isOpen, onClose }: Props) => {
-	const downloadUsersReport = useDownloadUsersReport();
-	const [reportType, setReportType] = useState<ReportOption>();
+export const GenerateReportModal = ({ isOpen, onClose, handleClose }: Props) => {
+	const reports: ReportOption[] = [
+		{ id: ReportType.Users, label: "Listado de usuarios" },
+		{ id: ReportType.Payments, label: "Conteo de horas y pagos" },
+		{ id: ReportType.History, label: "Historial de asistencia" },
+	];
+	const [reportType, setReportType] = useState<ReportOption>(reports[0]);
 	const [userInput, setUserInput] = useState<UserInput>({
-		startDate: null,
-		endDate: null,
+		startDate: dayjs().startOf("day"),
+		endDate: dayjs().startOf("day").add(1, "day"),
 	});
-
 	const style = {
 		position: "absolute",
 		top: "50%",
@@ -57,34 +59,10 @@ export const GenerateReportModal = ({ isOpen, onClose }: Props) => {
 	};
 
 	const selectReport = (event: SelectChangeEvent) => {
-		setReportType(reports.find((report) => report.id == parseInt(event.target.value)));
+		setReportType(
+			reports.find((report) => report.id == parseInt(event.target.value)) || reports[0]
+		);
 	};
-
-	const requestUsersReport = () => {
-		return downloadUsersReport.mutate(undefined, {
-			onSuccess(data) {
-				handleDownloadExcel(data);
-			},
-		});
-	};
-
-	const handleDownloadExcel = (originalData: Blob) => {
-		const data = new Blob([originalData], { type: "application/vnd.ms-excel" });
-		const href = URL.createObjectURL(data);
-		const link = document.createElement("a");
-		link.href = href;
-		link.setAttribute("download", "file.xls");
-		document.body.appendChild(link);
-		link.click();
-		document.body.removeChild(link);
-		URL.revokeObjectURL(href);
-	};
-
-	const reports: ReportOption[] = [
-		{ id: ReportType.Users, label: "Listado de usuarios", downloader: requestUsersReport },
-		{ id: ReportType.Payments, label: "Conteo de horas y pagos", downloader: () => {} },
-		{ id: ReportType.History, label: "Historial de asistencia", downloader: () => {} },
-	];
 
 	return (
 		<>
@@ -103,9 +81,9 @@ export const GenerateReportModal = ({ isOpen, onClose }: Props) => {
 									<FormControl fullWidth>
 										<InputLabel>Selecciona un tipo</InputLabel>
 										<Select
-											value={reportType ? `${reportType.id}` : ""}
+											value={`${reportType.id}`}
 											label="Seleccione un tipo"
-											onChange={selectReport}
+											onChange={(e) => selectReport(e)}
 										>
 											{reports.map((report) => (
 												<MenuItem key={report.id} value={report.id}>
@@ -116,10 +94,10 @@ export const GenerateReportModal = ({ isOpen, onClose }: Props) => {
 									</FormControl>
 								</TableCell>
 							</TableRow>
-							{reportType?.id == ReportType.Payments || reportType?.id == ReportType.History ? (
+							{reportType.id == ReportType.Payments || reportType.id == ReportType.History ? (
 								<TableRow>
 									<TableCell>
-										{reportType?.id == ReportType.Payments ? "Fecha de inicio" : "Fecha"}
+										{reportType.id == ReportType.Payments ? "Fecha de inicio" : "Fecha"}
 									</TableCell>
 									<TableCell>
 										<LocalizationProvider dateAdapter={AdapterDayjs}>
@@ -129,7 +107,7 @@ export const GenerateReportModal = ({ isOpen, onClose }: Props) => {
 													label="Selecciona un día"
 													value={userInput.startDate}
 													onChange={(newValue) =>
-														setUserInput({ startDate: newValue, endDate: null })
+														setUserInput({ ...userInput, startDate: newValue })
 													}
 												/>
 											</DemoContainer>
@@ -137,7 +115,7 @@ export const GenerateReportModal = ({ isOpen, onClose }: Props) => {
 									</TableCell>
 								</TableRow>
 							) : undefined}
-							{reportType?.id == ReportType.Payments ? (
+							{reportType.id == ReportType.Payments ? (
 								<TableRow>
 									<TableCell>Fecha de finalización</TableCell>
 									<TableCell>
@@ -168,7 +146,7 @@ export const GenerateReportModal = ({ isOpen, onClose }: Props) => {
 							display: "block",
 							margin: "20px auto 0",
 						}}
-						onClick={() => reportType?.downloader()}
+						onClick={() => handleClose(reportType.id, userInput)}
 					>
 						Guardar
 					</Button>

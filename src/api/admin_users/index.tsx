@@ -162,3 +162,35 @@ export const useDownloadUsersReport = () => {
 		},
 	});
 };
+
+interface StartEndRecord {
+	startDate: string;
+	endDate: string;
+}
+
+export const useDownloadPaymentsReport = () => {
+	return useMutation({
+		mutationKey: ["Employees"],
+		mutationFn: async ({ startDate, endDate }: StartEndRecord) => {
+			const { data } = await httpClient.get<Blob>(
+				`/reports/payroll?startDate=${startDate}&endDate=${endDate}`,
+				{
+					responseType: "blob",
+				}
+			);
+			return data;
+		},
+	});
+};
+
+export const useDownloadHistoryReport = () => {
+	return useMutation({
+		mutationKey: ["Employees"],
+		mutationFn: async (date: string) => {
+			const { data } = await httpClient.get<Blob>(`/reports/registration?date=${date}`, {
+				responseType: "blob",
+			});
+			return data;
+		},
+	});
+};
