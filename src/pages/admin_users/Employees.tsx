@@ -29,11 +29,16 @@ import {
 	useGetAllEmployees,
 	useGetSchedulesOfEmployee,
 	useRegisterInout,
+	useDownloadHistoryReport,
+	useDownloadPaymentsReport,
+	useDownloadUsersReport,
 } from "../../api";
 import { ListedEmployee, PaginationData } from "../../interfaces";
 import { SchedulesModal } from "../../components/SchedulesModal";
 import { useToggle } from "../../hooks";
 import { AddInoutModal, DeleteAlertDialog } from "../../components";
+import { GenerateReportModal } from "../../components/GenerateReportModal";
+import { ReportType } from "../../constants";
 
 const StyledTableCell = styled(TableCell)(({ theme }) => ({
 	[`&.${tableCellClasses.head}`]: {
@@ -76,10 +81,14 @@ export const AdminUsersEmployees = () => {
 	const getSchedulesOfEmployee = useGetSchedulesOfEmployee();
 	const deactivateEmployee = useDeactivateEmployee();
 	const registerInout = useRegisterInout();
+	const downloadUsersReport = useDownloadUsersReport();
+	const downloadPaymentsReport = useDownloadPaymentsReport();
+	const downloadHistoryReport = useDownloadHistoryReport();
 	const [employees, setEmployees] = useState<ListedEmployee[]>([]);
 	const [isOpenDeleteEmployee, toggleDeleteEmployee] = useToggle();
 	const [isOpenSchedules, toggleSchedules] = useToggle();
 	const [isOpenInout, toggleInout] = useToggle();
+	const [isOpenReports, toggleReports] = useToggle();
 	const [currentEmployee, setCurrentEmployee] = useState<ListedEmployee>({
 		id: 0,
 		name: "",
@@ -103,7 +112,7 @@ export const AdminUsersEmployees = () => {
 	const [page, setPage] = useState(0);
 	const [rowsPerPage, setRowsPerPage] = useState(5);
 
-	const handleChangePage = (event: unknown, newPage: number) => {
+	const handleChangePage = (_: unknown, newPage: number) => {
 		setPage(newPage);
 	};
 
@@ -177,8 +186,71 @@ export const AdminUsersEmployees = () => {
 		);
 	};
 
+	const requestUsersReport = () => {
+		return downloadUsersReport.mutate(undefined, {
+			onSuccess(data) {
+				handleDownloadExcel(data);
+			},
+		});
+	};
+
+	const requestPaymentsReport = (startDate: string, endDate: string) => {
+		return downloadPaymentsReport.mutate(
+			{ startDate: startDate, endDate: endDate },
+			{
+				onSuccess(data) {
+					handleDownloadExcel(data);
+				},
+			}
+		);
+	};
+
+	const requestHistoryReport = (date: string) => {
+		return downloadHistoryReport.mutate(date, {
+			onSuccess(data) {
+				handleDownloadExcel(data);
+			},
+		});
+	};
+
+	const handleDownloadExcel = (originalData: Blob) => {
+		const data = new Blob([originalData], { type: "application/vnd.ms-excel" });
+		const href = URL.createObjectURL(data);
+		const link = document.createElement("a");
+		link.href = href;
+		link.setAttribute("download", "file.xls");
+		document.body.appendChild(link);
+		link.click();
+		document.body.removeChild(link);
+		URL.revokeObjectURL(href);
+	};
+
 	return (
 		<>
+			<GenerateReportModal
+				isOpen={isOpenReports}
+				onClose={toggleReports}
+				handleClose={(reportTypeId, data) => {
+					if (reportTypeId == ReportType.Users) {
+						requestUsersReport();
+					} else if (reportTypeId == ReportType.Payments) {
+						if (
+							data.startDate &&
+							data.endDate &&
+							(data.startDate.isSame(data.endDate) || data.startDate.isBefore(data.endDate))
+						) {
+							requestPaymentsReport(
+								data.startDate.format("YYYY-MM-DD"),
+								data.endDate.format("YYYY-MM-DD")
+							);
+						}
+					} else if (reportTypeId == ReportType.History) {
+						if (data.startDate) {
+							requestHistoryReport(data.startDate.format("YYYY-MM-DD"));
+						}
+					}
+				}}
+			></GenerateReportModal>
 			<AddInoutModal
 				isOpen={isOpenInout}
 				onClose={toggleInout}
@@ -214,6 +286,27 @@ export const AdminUsersEmployees = () => {
 			>
 				<Box sx={{ minWidth: "70%", bgcolor: "#F0EFEF", padding: "2.5rem 1.5rem" }}>
 					<h2 style={{ marginTop: "0" }}>Tabla de empleados</h2>
+
+					<Box
+						sx={{
+							display: "flex",
+							justifyContent: "end",
+							alignItems: "center",
+							marginBottom: "1rem",
+						}}
+					>
+						<Button
+							variant="contained"
+							sx={{
+								backgroundColor: "#ABABAB",
+								color: "black",
+								"&:hover": { backgroundColor: "#858585" },
+							}}
+							onClick={toggleReports}
+						>
+							Generar Reporte
+						</Button>
+					</Box>
 
 					<Paper sx={{ width: "100%", overflow: "hidden" }}>
 						<TableContainer sx={{ maxHeight: 440 }}>
@@ -287,7 +380,7 @@ export const AdminUsersEmployees = () => {
 												},
 											}}
 										>
-											<StyledTableCell scope="row" align="center" colSpan={5}>
+											<StyledTableCell scope="row" align="center" colSpan={columns.length}>
 												No hay empleados para mostrar
 											</StyledTableCell>
 										</StyledTableRow>
@@ -306,12 +399,18 @@ export const AdminUsersEmployees = () => {
 						/>
 					</Paper>
 
-					<ColorButton
-						style={{ marginTop: "15px", marginLeft: "86%" }}
-						onClick={() => handleNewEmployee()}
+					<Box
+						sx={{
+							display: "flex",
+							justifyContent: "end",
+							alignItems: "center",
+							marginBottom: "1rem",
+						}}
 					>
-						Añadir +
-					</ColorButton>
+						<ColorButton style={{ marginTop: "1rem" }} onClick={() => handleNewEmployee()}>
+							Añadir +
+						</ColorButton>
+					</Box>
 				</Box>
 			</Container>
 		</>

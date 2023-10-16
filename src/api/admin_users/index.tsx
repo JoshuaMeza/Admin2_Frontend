@@ -1,15 +1,6 @@
 import { useMutation } from "@tanstack/react-query";
 import { httpClient } from "../../helpers";
-import {
-	ListedEmployee,
-	PaginationData,
-	Schedule,
-	Job,
-	Day,
-	ControlledUser,
-	FullEmployee,
-} from "../../interfaces";
-import { useMediaQuery } from "@mui/material";
+import { ListedEmployee, PaginationData, Schedule, Job, Day } from "../../interfaces";
 
 export const useGetJobs = () => {
 	return useMutation({
@@ -186,6 +177,50 @@ export const useRegisterInout = () => {
 			const { data } = await httpClient.post<unknown>(`/user/user/${employee_id}/register_inout`, {
 				arriving,
 				dateTimeRecord,
+			});
+			return data;
+		},
+	});
+};
+
+export const useDownloadUsersReport = () => {
+	return useMutation({
+		mutationKey: ["Employees"],
+		mutationFn: async () => {
+			const { data } = await httpClient.get<Blob>("/reports/users", {
+				responseType: "blob",
+			});
+			return data;
+		},
+	});
+};
+
+interface StartEndRecord {
+	startDate: string;
+	endDate: string;
+}
+
+export const useDownloadPaymentsReport = () => {
+	return useMutation({
+		mutationKey: ["Employees"],
+		mutationFn: async ({ startDate, endDate }: StartEndRecord) => {
+			const { data } = await httpClient.get<Blob>(
+				`/reports/payroll?startDate=${startDate}&endDate=${endDate}`,
+				{
+					responseType: "blob",
+				}
+			);
+			return data;
+		},
+	});
+};
+
+export const useDownloadHistoryReport = () => {
+	return useMutation({
+		mutationKey: ["Employees"],
+		mutationFn: async (date: string) => {
+			const { data } = await httpClient.get<Blob>(`/reports/registration?date=${date}`, {
+				responseType: "blob",
 			});
 			return data;
 		},

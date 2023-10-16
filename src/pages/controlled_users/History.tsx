@@ -99,9 +99,31 @@ export const ControlledUsersHistory = () => {
 									</TableRow>
 								</TableHead>
 								<TableBody>
-									{records.map((record, index) => (
+									{records && records.length > 0 ? (
+										records.map((record, index) => (
+											<StyledTableRow
+												key={index}
+												sx={{
+													"&:last-child td, &:last-child th": { border: 0 },
+													"&:nth-of-type(odd) .MuiTableCell-body": {
+														color: "#CB8B2A",
+													},
+												}}
+											>
+												<StyledTableCell scope="row" align="center">
+													{record.dayName}
+												</StyledTableCell>
+												<StyledTableCell scope="row" align="center">
+													{record.entryDatetime || "No registrado"}
+												</StyledTableCell>
+												<StyledTableCell scope="row" align="center">
+													{record.exitDatetime || "No registrado"}
+												</StyledTableCell>
+											</StyledTableRow>
+										))
+									) : (
 										<StyledTableRow
-											key={index}
+											key={0}
 											sx={{
 												"&:last-child td, &:last-child th": { border: 0 },
 												"&:nth-of-type(odd) .MuiTableCell-body": {
@@ -109,17 +131,11 @@ export const ControlledUsersHistory = () => {
 												},
 											}}
 										>
-											<StyledTableCell scope="row" align="center">
-												{record.dayName}
-											</StyledTableCell>
-											<StyledTableCell scope="row" align="center">
-												{record.entryDatetime || "No registrado"}
-											</StyledTableCell>
-											<StyledTableCell scope="row" align="center">
-												{record.exitDatetime || "No registrado"}
+											<StyledTableCell scope="row" align="center" colSpan={columns.length}>
+												No hay registros para mostrar
 											</StyledTableCell>
 										</StyledTableRow>
-									))}
+									)}
 								</TableBody>
 							</Table>
 						</TableContainer>
