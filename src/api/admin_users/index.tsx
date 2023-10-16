@@ -116,8 +116,9 @@ interface UpdatableUser {
 	password: string;
 	salary: number;
 	jobId: number;
-	active: true;
+	active: boolean;
 	schedules: ScheduleCreationStructure[];
+	deletableSchedules: number[];
 }
 
 export const useUpdateEmployee = () => {
@@ -158,15 +159,6 @@ export const useCreateSchedule = () => {
 				...schedule,
 			});
 			return data;
-		},
-	});
-};
-
-export const useDeleteSchedule = () => {
-	return useMutation({
-		mutationKey: ["Schedules"],
-		mutationFn: async (id: number) => {
-			await httpClient.delete<string>(`/schedules/${id}`);
 		},
 	});
 };

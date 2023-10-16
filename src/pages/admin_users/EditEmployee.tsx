@@ -27,7 +27,6 @@ import EditIcon from "@mui/icons-material/Edit";
 import React, { useEffect, useState } from "react";
 import { Day, FullEmployee, Job, Schedule } from "../../interfaces";
 import {
-	useDeleteSchedule,
 	useGetControlledUser,
 	useGetDays,
 	useGetJobs,
@@ -78,7 +77,6 @@ export const AdminUsersEditEmployee = () => {
 	const getSchedules = useGetSchedulesOfEmployee();
 	const getEmployee = useGetControlledUser();
 	const updateEmployee = useUpdateEmployee();
-	const deleteSchedule = useDeleteSchedule();
 	const [employee, setEmployee] = useState<FullEmployee>({
 		id: 0,
 		name: "",
@@ -120,8 +118,9 @@ export const AdminUsersEditEmployee = () => {
 		},
 		exitTime: "",
 	});
+	const [trashSchedule, setTrashSchedule] = useState<number[]>([]);
 
-	interface ScheduleCreationStructure {
+	interface ScheduleEditionStructure {
 		id: number;
 		entryDayId: number;
 		entryTime: string;
@@ -129,7 +128,7 @@ export const AdminUsersEditEmployee = () => {
 		exitTime: string;
 	}
 
-	const [updatableUser, setUpdatableUser] = useState<{
+	interface UpdatableUser {
 		id: number;
 		name: string;
 		email: string;
@@ -137,17 +136,11 @@ export const AdminUsersEditEmployee = () => {
 		salary: number;
 		jobId: number;
 		active: boolean;
-		schedules: ScheduleCreationStructure[];
-	}>({
-		id: 0,
-		name: "",
-		email: "",
-		password: "",
-		salary: 0,
-		jobId: 0,
-		active: true,
-		schedules: [],
-	});
+		schedules: ScheduleEditionStructure[];
+		deletableSchedules: number[];
+	}
+
+	var updatableUser: UpdatableUser;
 
 	const handleOpenEdit = (s: Schedule) => {
 		setNewSchedule(s);
@@ -161,6 +154,7 @@ export const AdminUsersEditEmployee = () => {
 		setOpenEdit(false);
 	};
 	const handleCloseDelete = () => {
+		setNewSchedule({ ...newSchedule, id: 0 });
 		setOpenDelete(false);
 	};
 
@@ -176,6 +170,7 @@ export const AdminUsersEditEmployee = () => {
 		const deletableSchedule = schedules.findIndex((schedule) => schedule.id === scheduleId);
 		if (deletableSchedule >= 0 && deletableSchedule < schedules.length) {
 			schedules.splice(deletableSchedule, 1);
+			trashSchedule.push(scheduleId);
 		}
 		handleCloseDelete();
 	};
@@ -266,28 +261,46 @@ export const AdminUsersEditEmployee = () => {
 		}
 	};
 
-	function transformSchedules(schedules: Schedule[]): ScheduleCreationStructure[] {
-		var list: ScheduleCreationStructure[];
-
+	function transformSchedules(schedules: Schedule[]): ScheduleEditionStructure[] {
+		var list: ScheduleEditionStructure[] = [];
+		schedules.forEach((s) => {
+			list.push({
+				id: s.id,
+				entryDayId: s.entryDay.id,
+				entryTime: s.entryTime,
+				exitDayId: s.exitDay.id,
+				exitTime: s.exitTime,
+			});
+		});
 		return list;
 	}
 
 	const handleEditEmployee = () => {
-		setUpdatableUser({
-			id: employee.id,
+		updatableUser = {
+			id: location.state.employee_id,
 			name: employee.name,
 			email: employee.email,
 			password: employee.password,
 			salary: employee.salary,
 			active: employee.active,
 			jobId: employee.job.id,
-			schedules: schedules,
-		});
+			schedules: transformSchedules(schedules),
+			deletableSchedules: trashSchedule,
+		};
+		console.log(updatableUser);
 		requestEditEmployee();
 	};
 
-	const requestEditEmployee = () => {};
-	const requestDeleteSchedule = () => {};
+	const requestEditEmployee = () => {
+		updateEmployee.mutate(updatableUser, {
+			onSuccess: (data) => {
+				console.log(data);
+			},
+			onError: () => {
+				console.log("Error al actualizar el usuario");
+			},
+		});
+	};
 
 	useEffect(() => {
 		requestEmployee(location.state.employee_id);
