@@ -8,9 +8,4 @@ services:
       context: .
     ports:
       - 1574:80
-    networks:
-      - ams_network
-
-networks:
-  ams_network:
-    driver: bridge
+    network-mode: "host"
