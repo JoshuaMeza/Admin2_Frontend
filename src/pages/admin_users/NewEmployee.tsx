@@ -156,7 +156,7 @@ export const AdminUsersCreateEmployee = () => {
 
 	const requestCreateEmployee = () => {
 		createEmployee.mutate(employee, {
-			onSuccess: (data) => {
+			onSuccess: () => {
 				console.log("Empleado creado con éxito");
 				navigate("/admin/employees");
 			},
@@ -270,7 +270,7 @@ export const AdminUsersCreateEmployee = () => {
 								options={jobLabels}
 								sx={{ width: "95%", marginTop: "10%" }}
 								color="warning"
-								onInputChange={(event: any, newValue: string | null) => setEmployeeJob(newValue)}
+								onInputChange={(_event: any, newValue: string | null) => setEmployeeJob(newValue)}
 								renderInput={(params) => (
 									<TextField {...params} label="Puesto de Trabajo" color="warning" />
 								)}
@@ -382,7 +382,7 @@ export const AdminUsersCreateEmployee = () => {
 												options={dayLabels}
 												sx={{ width: "100%" }}
 												color="warning"
-												onInputChange={(event: any, newValue: string | null) =>
+												onInputChange={(_event: any, newValue: string | null) =>
 													setScheduleEntryDay(newValue)
 												}
 												renderInput={(params) => (
@@ -397,7 +397,7 @@ export const AdminUsersCreateEmployee = () => {
 												options={dayTimes}
 												sx={{ width: "100%" }}
 												color="warning"
-												onInputChange={(event: any, newValue: string) =>
+												onInputChange={(_event: any, newValue: string) =>
 													setNewSchedule({ ...newSchedule, entryTime: newValue + ":00" })
 												}
 												renderInput={(params) => (
@@ -417,7 +417,7 @@ export const AdminUsersCreateEmployee = () => {
 												options={dayLabels}
 												sx={{ width: "100%" }}
 												color="warning"
-												onInputChange={(event: any, newValue: string | null) =>
+												onInputChange={(_event: any, newValue: string | null) =>
 													setScheduleExitDay(newValue)
 												}
 												renderInput={(params) => (
@@ -432,7 +432,7 @@ export const AdminUsersCreateEmployee = () => {
 												options={dayTimes}
 												sx={{ width: "100%" }}
 												color="warning"
-												onInputChange={(event: any, newValue: string) =>
+												onInputChange={(_event: any, newValue: string) =>
 													setNewSchedule({ ...newSchedule, exitTime: newValue + ":00" })
 												}
 												renderInput={(params) => (

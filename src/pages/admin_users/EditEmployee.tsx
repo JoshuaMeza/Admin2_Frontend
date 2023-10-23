@@ -72,6 +72,7 @@ interface Column {
 
 export const AdminUsersEditEmployee = () => {
 	const location = useLocation();
+	const navigate = useNavigate();
 	const getDays = useGetDays();
 	const getJobs = useGetJobs();
 	const getSchedules = useGetSchedulesOfEmployee();
@@ -118,7 +119,7 @@ export const AdminUsersEditEmployee = () => {
 		},
 		exitTime: "",
 	});
-	const [trashSchedule, setTrashSchedule] = useState<number[]>([]);
+	var trashSchedule: number[] = [];
 
 	interface ScheduleEditionStructure {
 		id: number;
@@ -220,7 +221,6 @@ export const AdminUsersEditEmployee = () => {
 	const requestEmployeeSchedule = (userId: number) => {
 		getSchedules.mutate(userId, {
 			onSuccess: (data) => {
-				console.log(data);
 				setSchedules(data);
 			},
 		});
@@ -293,8 +293,9 @@ export const AdminUsersEditEmployee = () => {
 
 	const requestEditEmployee = () => {
 		updateEmployee.mutate(updatableUser, {
-			onSuccess: (data) => {
-				console.log(data);
+			onSuccess: () => {
+				console.log("Empleado actualizado con éxito");
+				navigate("/admin/employees");
 			},
 			onError: () => {
 				console.log("Error al actualizar el usuario");
@@ -376,7 +377,7 @@ export const AdminUsersEditEmployee = () => {
 								sx={{ width: "95%", marginTop: "10%" }}
 								color="warning"
 								value={{ label: employee.job.name }}
-								onInputChange={(event: any, newValue: string | null) =>
+								onInputChange={(_event: any, newValue: string | null) =>
 									setEmployeeJobEntity(newValue)
 								}
 								renderInput={(params) => (
@@ -495,7 +496,7 @@ export const AdminUsersEditEmployee = () => {
 												options={dayLabels}
 												sx={{ width: "100%" }}
 												color="warning"
-												onInputChange={(event: any, newValue: string | null) =>
+												onInputChange={(_event: any, newValue: string | null) =>
 													setScheduleEntryDay(newValue)
 												}
 												renderInput={(params) => (
@@ -510,7 +511,7 @@ export const AdminUsersEditEmployee = () => {
 												options={dayTimes}
 												sx={{ width: "100%" }}
 												color="warning"
-												onInputChange={(event: any, newValue: string) =>
+												onInputChange={(_event: any, newValue: string) =>
 													setNewSchedule({ ...newSchedule, entryTime: newValue + ":00" })
 												}
 												renderInput={(params) => (
@@ -530,7 +531,7 @@ export const AdminUsersEditEmployee = () => {
 												options={dayLabels}
 												sx={{ width: "100%" }}
 												color="warning"
-												onInputChange={(event: any, newValue: string | null) =>
+												onInputChange={(_event: any, newValue: string | null) =>
 													setScheduleExitDay(newValue)
 												}
 												renderInput={(params) => (
@@ -545,7 +546,7 @@ export const AdminUsersEditEmployee = () => {
 												options={dayTimes}
 												sx={{ width: "100%" }}
 												color="warning"
-												onInputChange={(event: any, newValue: string) =>
+												onInputChange={(_event: any, newValue: string) =>
 													setNewSchedule({ ...newSchedule, exitTime: newValue + ":00" })
 												}
 												renderInput={(params) => (
@@ -597,7 +598,7 @@ export const AdminUsersEditEmployee = () => {
 												sx={{ width: "100%" }}
 												color="warning"
 												value={{ label: newSchedule.entryDay.name }}
-												onInputChange={(event: any, newValue: string | null) =>
+												onInputChange={(_event: any, newValue: string | null) =>
 													setScheduleEntryDay(newValue)
 												}
 												renderInput={(params) => (
@@ -613,7 +614,7 @@ export const AdminUsersEditEmployee = () => {
 												sx={{ width: "100%" }}
 												color="warning"
 												value={{ label: newSchedule.entryTime }}
-												onInputChange={(event: any, newValue: string) =>
+												onInputChange={(_event: any, newValue: string) =>
 													setNewSchedule({ ...newSchedule, entryTime: newValue })
 												}
 												renderInput={(params) => (
@@ -634,7 +635,7 @@ export const AdminUsersEditEmployee = () => {
 												sx={{ width: "100%" }}
 												color="warning"
 												value={{ label: newSchedule.exitDay.name }}
-												onInputChange={(event: any, newValue: string | null) =>
+												onInputChange={(_event: any, newValue: string | null) =>
 													setScheduleExitDay(newValue)
 												}
 												renderInput={(params) => (
@@ -650,7 +651,7 @@ export const AdminUsersEditEmployee = () => {
 												sx={{ width: "100%" }}
 												color="warning"
 												value={{ label: newSchedule.exitTime }}
-												onInputChange={(event: any, newValue: string) =>
+												onInputChange={(_event: any, newValue: string) =>
 													setNewSchedule({ ...newSchedule, exitTime: newValue })
 												}
 												renderInput={(params) => (
