@@ -47,17 +47,6 @@ const ColorButton = styled(Button)<ButtonProps>(({}) => ({
 	},
 }));
 
-const style = {
-	position: "absolute" as "absolute",
-	top: "50%",
-	left: "50%",
-	transform: "translate(-50%, -50%)",
-	width: 450,
-	bgcolor: "#D9D9D9",
-	boxShadow: 24,
-	p: 2,
-};
-
 interface Column {
 	id: "job" | "department" | "operations";
 	label: string;
