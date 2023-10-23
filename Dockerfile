@@ -4,6 +4,9 @@ FROM node:18-alpine AS builder
 # Establece el directorio de trabajo
 WORKDIR /usr/src/app
 
+# Copia el .env
+COPY .env ./
+
 # Copia package.json y package-lock.json
 COPY package*.json ./
 
