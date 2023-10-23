@@ -1,5 +1,9 @@
 version: '3.8'
 
+networks:
+ ams_network:
+  driver: bridge
+
 services:
   app:
     container_name: Admin2-Frontend
@@ -8,4 +12,5 @@ services:
       context: .
     ports:
       - 1574:80
-    network-mode: "host"
+    networks:
+      - ams_network
