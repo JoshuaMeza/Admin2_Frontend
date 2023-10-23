@@ -16,12 +16,14 @@ pipeline {
             steps {
                 script {
                     def containers = bat(script: 'docker ps --filter "name=frontend" --format "{{.Names}}"', returnStdout: true).trim()
-                    def countersCount = containers.tokenize().size()
-
-                    if (countersCount > 0) {
+                    def countersArray = containers.tokenize()
+                    
+                    if (containersArray.size() > 0) {
                         echo 'Deteniendo contenedores previos...'
-                        bat "docker stop ${containers}"
-                    } else {
+                        for (container in containersArray) {
+                            bat 'docker stop ${container}'
+                        }
+                    } else{
                         echo 'No se encontraron contenedores previos para detener.'
                     }
                 }
