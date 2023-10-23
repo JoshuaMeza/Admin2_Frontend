@@ -14,19 +14,28 @@ pipeline {
     stages {
         stage('Detener contenedores') {
             steps {
-                script {
-                    def containers = bat(script: 'docker ps --filter "name=frontend" --format "{{.Names}}"', returnStdout: true).trim()
-                    def countersArray = containers.tokenize()
-                    
-                    if (containersArray.size() > 0) {
-                        echo 'Deteniendo contenedores previos...'
-                        for (container in containersArray) {
-                            bat 'docker stop ${container}'
-                        }
-                    } else{
-                        echo 'No se encontraron contenedores previos para detener.'
-                    }
-                }
+                bat '''
+                    SETLOCAL EnableDelayedExpansion
+                    SET "contenedores="
+
+                    FOR /F "tokens=*" %%A IN ('docker ps --filter "name=backend" --format "{{.Names}}"') DO (
+                        SET "contenedores=!contenedores! %%A"
+                    )
+
+                    SET contadoresCount=0
+                    FOR %%B IN (!contenedores!) DO (
+                        SET /A contadoresCount+=1
+                    )
+
+                    IF !contadoresCount! equ 1 (
+                        echo Solo hay un contenedor por detener
+                        FOR %%B IN (!contenedores!) DO (
+                            docker stop %%B
+                        )
+                    ) ELSE (
+                        echo No hay contenedores backend por detener
+                    )
+                '''
             }
         }
 
