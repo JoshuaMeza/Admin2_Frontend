@@ -6,10 +6,10 @@ pipeline {
             steps {
                 script {
                     // Construir la imagen Docker
-                    bat 'docker build -t my-react-app .'
+                    bat 'docker-compose build'
 
                     // Ejecutar el contenedor Docker
-                    bat 'docker run -p 1574:80 my-react-app'
+                    bat 'docker-compose up -d'
                 }
             }
         }
