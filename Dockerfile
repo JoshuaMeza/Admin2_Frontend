@@ -5,7 +5,7 @@ FROM node:18-alpine AS builder
 WORKDIR /usr/src/app
 
 # Copia el .env
-COPY .env ./
+COPY .env.example .env
 
 # Copia package.json y package-lock.json
 COPY package*.json ./
