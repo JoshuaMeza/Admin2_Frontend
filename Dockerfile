@@ -20,7 +20,7 @@ COPY . .
 RUN npm run build
 
 # Verifica la estructura del directorio de build
-RUN ls /usr/src/app/build
+RUN ls /usr/src/app
 
 # Cambia a la imagen de Nginx estable para el despliegue
 FROM nginx:stable-alpine
