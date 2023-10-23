@@ -9,8 +9,6 @@ pipeline {
         BRANCH_NAME = "${GIT_BRANCH.split("/")[1]}"
         buildNumber = "${params.BUILD_NUMBER}"
         buildNumberWithoutQuotes = buildNumber.replace("'", "")
-        timestamp = new Date().format('yyyyMMddHHmmss')
-        uniqueIdentifier = buildNumberWithoutQuotes.isEmpty() ? timestamp : buildNumberWithoutQuotes
     }
 
     stages {
@@ -50,7 +48,11 @@ pipeline {
 
         stage('Construir Imagen') {
             steps {
-                bat "docker build -t ams-frontend-${BRANCH_NAME}:${uniqueIdentifier} ."
+                script {
+                    def timestamp = new Date().format('yyyyMMddHHmmss')
+                    def uniqueIdentifier = buildNumberWithoutQuotes.isEmpty() ? timestamp : buildNumberWithoutQuotes
+                    bat "docker build -t store-backend-${BRANCH_NAME}:${uniqueIdentifier} ."
+                }
             }
         }
 
