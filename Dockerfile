@@ -26,7 +26,7 @@ RUN ls /usr/src/app
 FROM nginx:stable-alpine
 
 # Copia la aplicación React construida desde la etapa anterior
-COPY --from=builder /usr/src/app /usr/share/nginx/html
+COPY --from=builder /usr/src/app/dist /usr/share/nginx/html
 
 # Expone el puerto
 EXPOSE 80
