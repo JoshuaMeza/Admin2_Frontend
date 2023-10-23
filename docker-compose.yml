@@ -8,3 +8,5 @@ services:
       context: .
     ports:
       - 1574:80
+    networks:
+      - ams_network
