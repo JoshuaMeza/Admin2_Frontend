@@ -13,17 +13,14 @@ COPY package*.json ./
 # Instala las dependencias
 RUN npm install
 
-# Verifica la estructura del directorio de trabajo
-RUN ls /usr/src/app
-
 # Copia el resto de los archivos de la aplicación
 COPY . .
 
 # Construye la aplicación React
 RUN npm run build
 
-# Verifica la estructura del directorio de build
-RUN ls /usr/src/app
+# Copia el archivo de configuración de Nginx personalizado
+COPY nginx.conf /etc/nginx/conf.d/default.conf
 
 # Cambia a la imagen de Nginx estable para el despliegue
 FROM nginx:stable-alpine
