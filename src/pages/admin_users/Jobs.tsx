@@ -77,6 +77,7 @@ export const AdminUsersJobs = () => {
 		setOpenDelete(true);
 	};
 	const handleCloseAdd = () => setOpenAdd(false);
+
 	const handleCloseEdit = () => {
 		var newJob: Job = {
 			id: 0,
@@ -133,8 +134,13 @@ export const AdminUsersJobs = () => {
 
 	return (
 		<>
-			<AddJobsModal isOpen={openAdd} onClose={handleCloseAdd}></AddJobsModal>
-			<EditJobsModal isOpen={openEdit} onClose={handleCloseEdit} job={job}></EditJobsModal>
+			<AddJobsModal isOpen={openAdd} onClose={handleCloseAdd} setJobs={setRows}></AddJobsModal>
+			<EditJobsModal
+				isOpen={openEdit}
+				onClose={handleCloseEdit}
+				job={job}
+				setJobs={setRows}
+			></EditJobsModal>
 			<DeleteAlertDialog
 				isOpen={openDelete}
 				onClose={handleCloseDelete}

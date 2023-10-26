@@ -10,12 +10,13 @@ import {
 	TextField,
 } from "@mui/material";
 import { Job } from "../interfaces";
-import React from "react";
+import React, { Dispatch } from "react";
 import { useCreateJob } from "../api";
 
 interface Props {
 	isOpen: boolean;
 	onClose: () => void;
+	setJobs: Dispatch<React.SetStateAction<Job[]>>;
 }
 
 const style = {
@@ -29,7 +30,7 @@ const style = {
 	p: 2,
 };
 
-export const AddJobsModal = ({ isOpen, onClose }: Props) => {
+export const AddJobsModal = ({ isOpen, onClose, setJobs }: Props) => {
 	const createJob = useCreateJob();
 	const [job, setJob] = React.useState<Job>({
 		id: 0,
@@ -41,7 +42,8 @@ export const AddJobsModal = ({ isOpen, onClose }: Props) => {
 		createJob.mutate(job, {
 			onSuccess: () => {
 				console.log("Puesto de trabajo creado con éxito");
-				window.location.reload();
+				setJobs((previous) => [...previous, job]);
+				onClose();
 			},
 			onError: () => {
 				console.log("Error al crear puesto de trabajo");

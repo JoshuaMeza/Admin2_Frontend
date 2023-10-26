@@ -10,13 +10,14 @@ import {
 	TextField,
 } from "@mui/material";
 import { Job } from "../interfaces";
-import React from "react";
+import React, { Dispatch } from "react";
 import { useUpdateJob } from "../api";
 
 interface Props {
 	isOpen: boolean;
 	onClose: () => void;
 	job: Job;
+	setJobs: Dispatch<React.SetStateAction<Job[]>>;
 }
 
 const style = {
@@ -30,7 +31,7 @@ const style = {
 	p: 2,
 };
 
-export const EditJobsModal = ({ isOpen, onClose, job }: Props) => {
+export const EditJobsModal = ({ isOpen, onClose, job, setJobs }: Props) => {
 	const updateJob = useUpdateJob();
 	const [newJob, setNewJob] = React.useState<Job>({
 		id: job.id,
@@ -42,7 +43,8 @@ export const EditJobsModal = ({ isOpen, onClose, job }: Props) => {
 		updateJob.mutate(newJob, {
 			onSuccess: () => {
 				console.log("Puesto de trabajo actualizado");
-				window.location.reload();
+				setJobs((previous) => previous.map((job) => (job.id === newJob.id ? newJob : job)));
+				onClose();
 			},
 			onError: () => {
 				console.log("Error al tratar de actualizar el puesto de trabajo");
