@@ -1,5 +1,9 @@
 version: '3.8'
 
+networks:
+ ams_network:
+  driver: bridge
+
 services:
   app:
     container_name: Admin2-Frontend
@@ -7,4 +11,6 @@ services:
     build:
       context: .
     ports:
-      - 80:80
+      - 1574:80
+    networks:
+      - ams_network

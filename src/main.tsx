@@ -5,8 +5,15 @@ import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
 
 import "./index.css";
 import { Layout } from "./Layout.tsx";
-import { ControlledUsers } from "./pages";
-
+import {
+	Login,
+	ControlledUsersSchedule,
+	ControlledUsersHistory,
+	AdminUsersJobs,
+	AdminUsersEmployees,
+	AdminUsersEditEmployee,
+	AdminUsersCreateEmployee,
+} from "./pages";
 
 const router = createBrowserRouter([
 	{
@@ -15,8 +22,32 @@ const router = createBrowserRouter([
 		children: [
 			{
 				path: "",
-				element: <ControlledUsers />,
-			}
+				element: <Login />,
+			},
+			{
+				path: "/users/schedule",
+				element: <ControlledUsersSchedule />,
+			},
+			{
+				path: "/users/history",
+				element: <ControlledUsersHistory />,
+			},
+			{
+				path: "/admin/jobs",
+				element: <AdminUsersJobs />,
+			},
+			{
+				path: "/admin/employees",
+				element: <AdminUsersEmployees />,
+			},
+			{
+				path: "/admin/employees/new",
+				element: <AdminUsersCreateEmployee />,
+			},
+			{
+				path: "/admin/employees/edit",
+				element: <AdminUsersEditEmployee />,
+			},
 		],
 	},
 ]);
@@ -28,5 +59,5 @@ ReactDOM.createRoot(document.getElementById("root")!).render(
 		<QueryClientProvider client={queryClient}>
 			<RouterProvider router={router} />
 		</QueryClientProvider>
-	</React.StrictMode>,
+	</React.StrictMode>
 );

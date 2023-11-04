@@ -1,0 +1,13 @@
+h2 {
+	text-align: center;
+}
+
+.div-input-form {
+	display: flex;
+	justify-content: center;
+}
+
+.div-button {
+	display: flex;
+	justify-content: center;
+}
